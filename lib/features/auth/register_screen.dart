@@ -15,8 +15,33 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
+  final FocusNode _firstNameFocusNode = FocusNode();
+  final FocusNode _lastNameFocusNode = FocusNode();
+  final FocusNode _emailFocusNode = FocusNode();
+  final FocusNode _passwordFocusNode = FocusNode();
+  final FocusNode _confirmPasswordFocusNode = FocusNode();
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _firstNameFocusNode.addListener(() {
+      setState(() {});
+    });
+    _lastNameFocusNode.addListener(() {
+      setState(() {});
+    });
+    _emailFocusNode.addListener(() {
+      setState(() {});
+    });
+    _passwordFocusNode.addListener(() {
+      setState(() {});
+    });
+    _confirmPasswordFocusNode.addListener(() {
+      setState(() {});
+    });
+  }
 
   @override
   void dispose() {
@@ -25,6 +50,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+    _firstNameFocusNode.dispose();
+    _lastNameFocusNode.dispose();
+    _emailFocusNode.dispose();
+    _passwordFocusNode.dispose();
+    _confirmPasswordFocusNode.dispose();
     super.dispose();
   }
 
@@ -61,7 +91,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 90),
+                const SizedBox(height: 50),
                 // First Name and Last Name Row
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -82,33 +112,49 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           const SizedBox(height: 6),
                           Container(
                             decoration: BoxDecoration(
-                              color: const Color(0xFF191919),
-                              border: Border.all(
-                                color: const Color(0xFF595959),
-                                width: 0.5,
+                              gradient: const LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [
+                                  Color(0xFFFFFFFF),
+                                  Color(0xFF000000),
+                                ],
                               ),
-                              borderRadius: BorderRadius.circular(6),
-                              boxShadow: const [
-                                BoxShadow(
-                                  color: Color.fromRGBO(0, 0, 0, 0.50),
-                                  blurRadius: 6,
-                                  offset: Offset(0, 2),
-                                ),
-                              ],
+                              borderRadius: BorderRadius.circular(8),
+                              boxShadow: _firstNameFocusNode.hasFocus
+                                  ? [
+                                      BoxShadow(
+                                        color: const Color(0xFFE4472B).withValues(alpha: 0.3),
+                                        offset: Offset(0, 0),
+                                        blurRadius: 0,
+                                        spreadRadius: 3,
+                                      ),
+                                    ]
+                                  : null,
                             ),
-                            child: TextField(
-                              controller: _firstNameController,
-                              style: GoogleFonts.golosText(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w400,
-                                color: const Color(0xFFFFFFFF),
-                                height: 1.125,
-                              ),
-                              decoration: InputDecoration(
-                                border: InputBorder.none,
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 11,
+                            child: Padding(
+                              padding: const EdgeInsets.all(0.5),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF191919),
+                                  borderRadius: BorderRadius.circular(7.5),
+                                ),
+                                child: TextField(
+                                  controller: _firstNameController,
+                                  focusNode: _firstNameFocusNode,
+                                  style: GoogleFonts.golosText(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w400,
+                                    color: const Color(0xFFFFFFFF),
+                                    height: 1.125,
+                                  ),
+                                  decoration: InputDecoration(
+                                    border: InputBorder.none,
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 14,
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
@@ -133,33 +179,49 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           const SizedBox(height: 6),
                           Container(
                             decoration: BoxDecoration(
-                              color: const Color(0xFF191919),
-                              border: Border.all(
-                                color: const Color(0xFF595959),
-                                width: 0.5,
+                              gradient: const LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [
+                                  Color(0xFFFFFFFF),
+                                  Color(0xFF000000),
+                                ],
                               ),
-                              borderRadius: BorderRadius.circular(6),
-                              boxShadow: const [
-                                BoxShadow(
-                                  color: Color.fromRGBO(0, 0, 0, 0.50),
-                                  blurRadius: 6,
-                                  offset: Offset(0, 2),
-                                ),
-                              ],
+                              borderRadius: BorderRadius.circular(8),
+                              boxShadow: _lastNameFocusNode.hasFocus
+                                  ? [
+                                      BoxShadow(
+                                        color: const Color(0xFFE4472B).withValues(alpha: 0.3),
+                                        offset: Offset(0, 0),
+                                        blurRadius: 0,
+                                        spreadRadius: 3,
+                                      ),
+                                    ]
+                                  : null,
                             ),
-                            child: TextField(
-                              controller: _lastNameController,
-                              style: GoogleFonts.golosText(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w400,
-                                color: const Color(0xFFFFFFFF),
-                                height: 1.125,
-                              ),
-                              decoration: InputDecoration(
-                                border: InputBorder.none,
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 11,
+                            child: Padding(
+                              padding: const EdgeInsets.all(0.5),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF191919),
+                                  borderRadius: BorderRadius.circular(7.5),
+                                ),
+                                child: TextField(
+                                  controller: _lastNameController,
+                                  focusNode: _lastNameFocusNode,
+                                  style: GoogleFonts.golosText(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w400,
+                                    color: const Color(0xFFFFFFFF),
+                                    height: 1.125,
+                                  ),
+                                  decoration: InputDecoration(
+                                    border: InputBorder.none,
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 14,
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
@@ -185,41 +247,57 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     const SizedBox(height: 6),
                     Container(
                       decoration: BoxDecoration(
-                        color: const Color(0xFF191919),
-                        border: Border.all(
-                          color: const Color(0xFF595959),
-                          width: 0.5,
+                        gradient: const LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Color(0xFFFFFFFF),
+                            Color(0xFF000000),
+                          ],
                         ),
-                        borderRadius: BorderRadius.circular(6),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Color.fromRGBO(0, 0, 0, 0.50),
-                            blurRadius: 6,
-                            offset: Offset(0, 2),
-                          ),
-                        ],
+                        borderRadius: BorderRadius.circular(8),
+                        boxShadow: _emailFocusNode.hasFocus
+                            ? [
+                                BoxShadow(
+                                  color: const Color(0xFFE4472B).withValues(alpha: 0.3),
+                                  offset: Offset(0, 0),
+                                  blurRadius: 0,
+                                  spreadRadius: 3,
+                                ),
+                              ]
+                            : null,
                       ),
-                      child: TextField(
-                        controller: _emailController,
-                        keyboardType: TextInputType.emailAddress,
-                        style: GoogleFonts.golosText(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w400,
-                          color: const Color(0xFF999999),
-                          height: 1.125,
-                        ),
-                        decoration: InputDecoration(
-                          hintText: 'you@example.com',
-                          hintStyle: GoogleFonts.golosText(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w400,
-                            color: const Color(0xFF999999),
-                            height: 1.125,
+                      child: Padding(
+                        padding: const EdgeInsets.all(0.5),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF191919),
+                            borderRadius: BorderRadius.circular(7.5),
                           ),
-                          border: InputBorder.none,
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 11,
+                          child: TextField(
+                            controller: _emailController,
+                            focusNode: _emailFocusNode,
+                            keyboardType: TextInputType.emailAddress,
+                            style: GoogleFonts.golosText(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w400,
+                              color: const Color(0xFFFFFFFF),
+                              height: 1.125,
+                            ),
+                            decoration: InputDecoration(
+                              hintText: 'you@example.com',
+                              hintStyle: GoogleFonts.golosText(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w400,
+                                color: const Color(0xFF999999),
+                                height: 1.125,
+                              ),
+                              border: InputBorder.none,
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 14,
+                              ),
+                            ),
                           ),
                         ),
                       ),
@@ -242,47 +320,63 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     const SizedBox(height: 6),
                     Container(
                       decoration: BoxDecoration(
-                        color: const Color(0xFF191919),
-                        border: Border.all(
-                          color: const Color(0xFF595959),
-                          width: 0.5,
+                        gradient: const LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Color(0xFFFFFFFF),
+                            Color(0xFF000000),
+                          ],
                         ),
-                        borderRadius: BorderRadius.circular(6),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Color.fromRGBO(0, 0, 0, 0.50),
-                            blurRadius: 6,
-                            offset: Offset(0, 2),
-                          ),
-                        ],
+                        borderRadius: BorderRadius.circular(8),
+                        boxShadow: _passwordFocusNode.hasFocus
+                            ? [
+                                BoxShadow(
+                                  color: const Color(0xFFE4472B).withValues(alpha: 0.3),
+                                  offset: Offset(0, 0),
+                                  blurRadius: 0,
+                                  spreadRadius: 3,
+                                ),
+                              ]
+                            : null,
                       ),
-                      child: TextField(
-                        controller: _passwordController,
-                        obscureText: _obscurePassword,
-                        style: GoogleFonts.golosText(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w400,
-                          color: const Color(0xFFFFFFFF),
-                          height: 1.125,
-                        ),
-                        decoration: InputDecoration(
-                          border: InputBorder.none,
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 11,
+                      child: Padding(
+                        padding: const EdgeInsets.all(0.5),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF191919),
+                            borderRadius: BorderRadius.circular(7.5),
                           ),
-                          suffixIcon: GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                _obscurePassword = !_obscurePassword;
-                              });
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.all(12.0),
-                              child: SvgPicture.asset(
-                                'assets/icons/eye_icon.svg',
-                                width: 13,
-                                height: 8,
+                          child: TextField(
+                            controller: _passwordController,
+                            focusNode: _passwordFocusNode,
+                            obscureText: _obscurePassword,
+                            style: GoogleFonts.golosText(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w400,
+                              color: const Color(0xFFFFFFFF),
+                              height: 1.125,
+                            ),
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 14,
+                              ),
+                              suffixIcon: GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    _obscurePassword = !_obscurePassword;
+                                  });
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.all(12.0),
+                                  child: SvgPicture.asset(
+                                    'assets/icons/eye_icon.svg',
+                                    width: 13,
+                                    height: 8,
+                                  ),
+                                ),
                               ),
                             ),
                           ),
@@ -307,7 +401,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Confirm New Password',
+                      'Confirm Password',
                       style: GoogleFonts.golosText(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
@@ -317,47 +411,63 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     const SizedBox(height: 6),
                     Container(
                       decoration: BoxDecoration(
-                        color: const Color(0xFF191919),
-                        border: Border.all(
-                          color: const Color(0xFF595959),
-                          width: 0.5,
+                        gradient: const LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Color(0xFFFFFFFF),
+                            Color(0xFF000000),
+                          ],
                         ),
-                        borderRadius: BorderRadius.circular(6),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Color.fromRGBO(0, 0, 0, 0.50),
-                            blurRadius: 6,
-                            offset: Offset(0, 2),
-                          ),
-                        ],
+                        borderRadius: BorderRadius.circular(8),
+                        boxShadow: _confirmPasswordFocusNode.hasFocus
+                            ? [
+                                BoxShadow(
+                                  color: const Color(0xFFE4472B).withValues(alpha: 0.3),
+                                  offset: Offset(0, 0),
+                                  blurRadius: 0,
+                                  spreadRadius: 3,
+                                ),
+                              ]
+                            : null,
                       ),
-                      child: TextField(
-                        controller: _confirmPasswordController,
-                        obscureText: _obscureConfirmPassword,
-                        style: GoogleFonts.golosText(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w400,
-                          color: const Color(0xFFFFFFFF),
-                          height: 1.125,
-                        ),
-                        decoration: InputDecoration(
-                          border: InputBorder.none,
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 11,
+                      child: Padding(
+                        padding: const EdgeInsets.all(0.5),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF191919),
+                            borderRadius: BorderRadius.circular(7.5),
                           ),
-                          suffixIcon: GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                _obscureConfirmPassword = !_obscureConfirmPassword;
-                              });
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.all(12.0),
-                              child: SvgPicture.asset(
-                                'assets/icons/eye_icon.svg',
-                                width: 13,
-                                height: 8,
+                          child: TextField(
+                            controller: _confirmPasswordController,
+                            focusNode: _confirmPasswordFocusNode,
+                            obscureText: _obscureConfirmPassword,
+                            style: GoogleFonts.golosText(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w400,
+                              color: const Color(0xFFFFFFFF),
+                              height: 1.125,
+                            ),
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 14,
+                              ),
+                              suffixIcon: GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    _obscureConfirmPassword = !_obscureConfirmPassword;
+                                  });
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.all(12.0),
+                                  child: SvgPicture.asset(
+                                    'assets/icons/eye_icon.svg',
+                                    width: 13,
+                                    height: 8,
+                                  ),
+                                ),
                               ),
                             ),
                           ),

@@ -133,7 +133,7 @@ class _OtpScreenState extends State<OtpScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 65),
+              const SizedBox(height: 50),
               // Title
               Text(
                 'Verify account with OTP',
@@ -149,7 +149,7 @@ class _OtpScreenState extends State<OtpScreen> {
                 'We have sent 6 code to ${widget.email}',
                 style: GoogleFonts.inter(
                   fontSize: 12,
-                  fontWeight: FontWeight.w400,
+                  fontWeight: FontWeight.w200,
                   color: const Color(0xFFFFFFFF).withOpacity(0.5),
                 ),
               ),
@@ -188,30 +188,34 @@ class _OtpScreenState extends State<OtpScreen> {
                 },
               ),
               const SizedBox(height: 34),
-              // Resend text
-              RichText(
-                text: TextSpan(
-                  text: 'Didn’t get the code? ',
-                  style: GoogleFonts.golosText(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w400,
-                    color: const Color(0xFF999999),
-                  ),
-                  children: [
-                    WidgetSpan(
-                      child: GestureDetector(
-                        onTap: _handleResend,
-                        child: Text(
-                          'Resend it.',
-                          style: GoogleFonts.golosText(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w400,
-                            color: const Color(0xFFE0543D),
+              // Resend text (single line, centered)
+              Center(
+                child: RichText(
+                  textAlign: TextAlign.center,
+                  text: TextSpan(
+                    text: 'Didn’t get the code? ',
+                    style: GoogleFonts.golosText(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w300,
+                      color: const Color(0xFF999999),
+                    ),
+                    children: [
+                      WidgetSpan(
+                        alignment: PlaceholderAlignment.middle,
+                        child: GestureDetector(
+                          onTap: _handleResend,
+                          child: Text(
+                            'Resend it.',
+                            style: GoogleFonts.golosText(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w300,
+                              color: const Color(0xFFE0543D),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
               const Spacer(),

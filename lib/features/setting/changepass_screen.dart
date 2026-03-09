@@ -15,15 +15,30 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   final TextEditingController _confirmPasswordController =
       TextEditingController();
 
+  late FocusNode _passwordFocusNode;
+  late FocusNode _newPasswordFocusNode;
+  late FocusNode _confirmPasswordFocusNode;
+
   bool _obscurePassword = true;
   bool _obscureNewPassword = true;
   bool _obscureConfirmPassword = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _passwordFocusNode = FocusNode();
+    _newPasswordFocusNode = FocusNode();
+    _confirmPasswordFocusNode = FocusNode();
+  }
 
   @override
   void dispose() {
     _passwordController.dispose();
     _newPasswordController.dispose();
     _confirmPasswordController.dispose();
+    _passwordFocusNode.dispose();
+    _newPasswordFocusNode.dispose();
+    _confirmPasswordFocusNode.dispose();
     super.dispose();
   }
 

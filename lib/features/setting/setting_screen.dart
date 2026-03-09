@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'changepass_screen.dart';
@@ -68,7 +70,7 @@ class _SettingScreenState extends State<SettingScreen> {
                   ),
                   child: Column(
                     children: [
-        SettingItem(
+                      SettingItem(
                         icon: 'assets/icons/password_icon.png',
                         title: 'Change Password',
                         onTap: () {
@@ -163,10 +165,7 @@ class ProfileSection extends StatelessWidget {
       decoration: BoxDecoration(
         color: const Color(0xFF191919),
         borderRadius: BorderRadius.circular(5),
-        border: Border.all(
-          color: const Color(0xFF282828),
-          width: 1,
-        ),
+        border: Border.all(color: const Color(0xFF282828), width: 1),
       ),
       child: Row(
         children: [
@@ -234,12 +233,7 @@ class SettingItem extends StatelessWidget {
         child: Row(
           children: [
             // Icon
-            Image.asset(
-              icon,
-              width: 30,
-              height: 30,
-              fit: BoxFit.cover,
-            ),
+            Image.asset(icon, width: 30, height: 30, fit: BoxFit.cover),
             const SizedBox(width: 20),
             // Title
             Expanded(
@@ -253,11 +247,14 @@ class SettingItem extends StatelessWidget {
               ),
             ),
             // Chevron
-            Image.asset(
-              chevronPath ?? 'assets/icons/chevron_right_white.png',
-              width: 15,
-              height: 15,
-              fit: BoxFit.cover,
+            Transform.rotate(
+              angle: pi,
+              child: Image.asset(
+                chevronPath ?? 'assets/icons/chevron_right_white.png',
+                width: 15,
+                height: 15,
+                fit: BoxFit.cover,
+              ),
             ),
           ],
         ),
@@ -283,16 +280,11 @@ class SettingItemWithToggle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       child: Row(
         children: [
           // Icon
-          Image.asset(
-            icon,
-            width: 30,
-            height: 30,
-            fit: BoxFit.cover,
-          ),
+          Image.asset(icon, width: 30, height: 30, fit: BoxFit.cover),
           const SizedBox(width: 20),
           // Title
           Expanded(
@@ -305,6 +297,7 @@ class SettingItemWithToggle extends StatelessWidget {
               ),
             ),
           ),
+          const SizedBox(width: 10),
           // Toggle Switch
           Transform.scale(
             scale: 0.8,

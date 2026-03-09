@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'features/auth/login_screen.dart';
+import 'features/auth/otp_screen.dart';
+import 'features/setting/setting_screen.dart';
 // import 'features/portfolio/portfolio_screen.dart';
 
 
@@ -28,7 +30,8 @@ class MyApp extends StatelessWidget {
         scaffoldBackgroundColor: const Color(0xFF121212),
         useMaterial3: true,
       ),
-      home: const LoginScreen(), // start app on login
+      // start app directly on Setting screen for testing/demo
+      home: const SettingScreen(),
     );
   }
 }
