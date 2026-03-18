@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'portfolioadd_screen.dart';
+import 'portfolioremove_screen.dart';
 
 // ─── Design Tokens ────────────────────────────────────────────────────────────
 const Color _kBg = Color(0xFF121212);
@@ -297,7 +298,11 @@ class _ActionButtonRow extends StatelessWidget {
           child: _ActionButton(
             iconPath: 'assets/images/remove_icon.png',
             label: 'Remove',
-            onTap: () {},
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (_) => const PortfolioRemoveScreen()),
+            ),
           ),
         ),
         const SizedBox(width: 22),
