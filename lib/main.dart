@@ -6,6 +6,7 @@ import 'features/setting/setting_screen.dart';
 import 'features/portfolio/portfolioremove_screen.dart';
 import 'features/chat/historychat_screen.dart';
 import 'features/chat/chat_screen.dart';
+import 'features/home/home_screen.dart';
 // import 'features/portfolio/portfolio_screen.dart';
 
 
@@ -34,7 +35,7 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       // start app directly on PortfolioRemoveScreen for testing/demo
-      home: const ChatScreen(),
+      home: const HomeScreen(),
     );
   }
 }
