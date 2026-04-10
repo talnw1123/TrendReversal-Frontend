@@ -7,11 +7,11 @@ import 'features/portfolio/portfolioremove_screen.dart';
 import 'features/chat/historychat_screen.dart';
 import 'features/chat/chat_screen.dart';
 import 'features/home/home_screen.dart';
-// import 'features/portfolio/portfolio_screen.dart';
+import 'core/currency_provider.dart';
 
-
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await CurrencyProvider().init();
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,

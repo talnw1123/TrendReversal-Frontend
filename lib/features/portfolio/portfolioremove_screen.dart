@@ -1,81 +1,22 @@
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'portfolio_controller.dart';
 
 // ─── Design Tokens ────────────────────────────────────────────────────────────
 const Color _kBg = Color(0xFF121212);
 const Color _kSectionBg = Color(0xFF000000);
-const Color _kInputBg = Color(0xFF282828);
+const Color _kCard = Color(0xFF191919);
+const Color _kBtn = Color(0xFF282828);
+const Color _kGreen = Color(0xFF47D5A6);
 const Color _kRed = Color(0xFFE4472B);
 const Color _kWhite = Color(0xFFFFFFFF);
-const Color _kGray = Color(0xFF999999);
+const Color _kWhite80 = Color(0xCCFFFFFF);
+const Color _kGray = Color(0xFF595959);
+const Color _kDivider = Color(0xFF1F1F1F);
 const Color _kDark = Color(0xFF050505);
 
-// ─── Mock Data ────────────────────────────────────────────────────────────────
-const List<String> _kMarketOptions = [
-  'Bitcoin (BTC)',
-  'Ethereum (ETH)',
-  'Solana (SOL)',
-  'BNB (BNB)',
-];
-
-class _AssetInfo {
-  final String iconPath;
-  final String ticker;
-  final String coinName;
-  final String sellingPrice;
-  final String quantity;
-  final String date;
-
-  const _AssetInfo({
-    required this.iconPath,
-    required this.ticker,
-    required this.coinName,
-    required this.sellingPrice,
-    required this.quantity,
-    required this.date,
-  });
-}
-
-const Map<String, _AssetInfo> _kAssetMap = {
-  'Bitcoin (BTC)': _AssetInfo(
-    iconPath: 'assets/images/bitcoin_circle_icon.png',
-    ticker: 'BTC',
-    coinName: 'Bitcoin',
-    sellingPrice: '60,000',
-    quantity: '0.02575',
-    date: '12/10/2026',
-  ),
-  'Ethereum (ETH)': _AssetInfo(
-    iconPath: 'assets/images/bitcoin_circle_icon.png',
-    ticker: 'ETH',
-    coinName: 'Ethereum',
-    sellingPrice: '98,000',
-    quantity: '0.51200',
-    date: '11/05/2026',
-  ),
-  'Solana (SOL)': _AssetInfo(
-    iconPath: 'assets/images/bitcoin_circle_icon.png',
-    ticker: 'SOL',
-    coinName: 'Solana',
-    sellingPrice: '12,500',
-    quantity: '10.2541',
-    date: '09/22/2026',
-  ),
-  'BNB (BNB)': _AssetInfo(
-    iconPath: 'assets/images/bitcoin_circle_icon.png',
-    ticker: 'BNB',
-    coinName: 'BNB',
-    sellingPrice: '22,000',
-    quantity: '5.0000',
-    date: '08/15/2026',
-  ),
-};
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// PortfolioRemoveScreen
-// ═══════════════════════════════════════════════════════════════════════════════
+// ─── Screen ───────────────────────────────────────────────────────────────────
 class PortfolioRemoveScreen extends StatefulWidget {
   const PortfolioRemoveScreen({super.key});
 
@@ -84,40 +25,34 @@ class PortfolioRemoveScreen extends StatefulWidget {
 }
 
 class _PortfolioRemoveScreenState extends State<PortfolioRemoveScreen> {
-  String _selectedMarket = 'Bitcoin (BTC)';
+  final _ctrl = PortfolioController();
+  List<dynamic> _items = [];
+  bool _loading = true;
+  String? _error;
 
-  _AssetInfo get _currentAsset => _kAssetMap[_selectedMarket]!;
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
 
-  void _onRemove() {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: _kInputBg,
-        title: Text(
-          'Confirm Remove',
-          style: GoogleFonts.inter(color: _kWhite, fontWeight: FontWeight.w500),
-        ),
-        content: Text(
-          'Remove ${_currentAsset.coinName} (${_currentAsset.ticker}) from your portfolio?',
-          style: GoogleFonts.inter(color: _kGray),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text('Cancel',
-                style: GoogleFonts.inter(color: _kGray)),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(ctx);
-              Navigator.pop(context);
-            },
-            child: Text('Remove',
-                style: GoogleFonts.inter(color: _kRed, fontWeight: FontWeight.w600)),
-          ),
-        ],
-      ),
-    );
+  Future<void> _load() async {
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    try {
+      final data = await _ctrl.getPortfolioData();
+      setState(() {
+        _items = data['history'] ?? [];
+        _loading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _error = 'โหลดข้อมูลไม่สำเร็จ';
+        _loading = false;
+      });
+    }
   }
 
   @override
@@ -126,338 +61,156 @@ class _PortfolioRemoveScreenState extends State<PortfolioRemoveScreen> {
       backgroundColor: _kBg,
       body: SafeArea(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             const SizedBox(height: 20),
-            // ── Title ─────────────────────────────────────────────────────
-            Text(
-              'Portfolio',
-              style: GoogleFonts.inter(
-                fontSize: 24,
-                fontWeight: FontWeight.w400,
-                color: _kWhite,
-              ),
-            ),
-            const SizedBox(height: 16),
-            // ── Section container ──────────────────────────────────────────
-            Expanded(
-              child: Container(
-                color: _kSectionBg,
-                child: Column(
-                  children: [
-                    // "Edit Portfolio" tab header
-                    const _EditPortfolioTab(),
-                    // Scrollable content
-                    Expanded(
-                      child: SingleChildScrollView(
-                        padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            // ── Market Type ───────────────────────────────
-                            const _FieldLabel('Market Type'),
-                            const SizedBox(height: 6),
-                            _MarketDropdown(
-                              value: _selectedMarket,
-                              items: _kMarketOptions,
-                              onChanged: (v) =>
-                                  setState(() => _selectedMarket = v!),
-                            ),
-                            const SizedBox(height: 20),
-                            // ── Preview Card ──────────────────────────────
-                            _PreviewCard(asset: _currentAsset),
-                            const SizedBox(height: 28),
-                            // ── Remove Button ─────────────────────────────
-                            _RemoveButton(onTap: _onRemove),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
+            Text('Portfolio',
+                style: GoogleFonts.inter(fontSize: 24, color: _kWhite)),
+            const SizedBox(height: 20),
+            Expanded(child: _body()),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _body() {
+    if (_loading) return const Center(child: CircularProgressIndicator(color: _kRed));
+    if (_error != null) return Center(child: Text(_error!, style: const TextStyle(color: _kWhite80)));
+
+    return Column(
+      children: [
+        _sectionHeader('Remove Asset'),
+        const SizedBox(height: 20),
+        Expanded(
+          child: _items.isEmpty
+              ? const Center(child: Text('ไม่มีสินทรัพย์ที่สามารถลบได้', style: TextStyle(color: _kWhite80)))
+              : ListView.separated(
+                  padding: const EdgeInsets.symmetric(horizontal: 21),
+                  itemCount: _items.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 12),
+                  itemBuilder: (context, index) => _AssetRemoveItem(
+                    item: _items[index],
+                    onRemove: () => _confirmRemove(_items[index]),
+                  ),
                 ),
-              ),
-            ),
-          ],
         ),
-      ),
-    );
-  }
-}
-
-// ─── Edit Portfolio Tab ───────────────────────────────────────────────────────
-class _EditPortfolioTab extends StatelessWidget {
-  const _EditPortfolioTab();
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        const SizedBox(height: 14),
-        Text(
-          'Edit Portfolio',
-          style: GoogleFonts.inter(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            color: _kRed,
-          ),
-        ),
-        const SizedBox(height: 10),
-        Container(height: 1.5, color: _kRed),
+        _bottomActions(),
       ],
     );
   }
-}
 
-// ─── Field Label ──────────────────────────────────────────────────────────────
-class _FieldLabel extends StatelessWidget {
-  final String text;
-  const _FieldLabel(this.text);
+  Widget _sectionHeader(String label) => Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        color: _kSectionBg,
+        child: Center(
+          child: Text(label,
+              style: GoogleFonts.golosText(
+                  fontSize: 20, fontWeight: FontWeight.w600, color: _kRed)),
+        ),
+      );
 
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: GoogleFonts.golosText(
-        fontSize: 14,
-        fontWeight: FontWeight.w500,
-        color: _kGray,
+  Future<void> _confirmRemove(dynamic item) async {
+    final name = item['assetLabel'] as String? ?? item['assetId'] as String? ?? 'Asset';
+    final id = item['id'].toString();
+
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        backgroundColor: _kCard,
+        title: const Text('ลบสินทรัพย์', style: TextStyle(color: _kWhite)),
+        content: Text('คุณต้องการลบ $name หรือไม่?', style: const TextStyle(color: _kWhite80)),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('ยกเลิก')),
+          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('ลบ', style: TextStyle(color: _kRed))),
+        ],
       ),
     );
+
+    if (confirm == true) {
+      await _ctrl.deleteItem(id);
+      _load();
+    }
   }
+
+  Widget _bottomActions() => Padding(
+        padding: const EdgeInsets.fromLTRB(24, 20, 24, 30),
+        child: Row(
+          children: [
+            Expanded(
+              child: _btn('Cancel', _kBtn, _kWhite, () => Navigator.pop(context)),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: _btn('Done', _kGreen, _kDark, () => Navigator.pop(context, true)),
+            ),
+          ],
+        ),
+      );
+
+  Widget _btn(String label, Color bg, Color text, VoidCallback onTap) =>
+      GestureDetector(
+        onTap: onTap,
+        child: Container(
+          height: 54,
+          decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(10)),
+          child: Center(
+              child: Text(label,
+                  style: GoogleFonts.inter(
+                      fontSize: 16, fontWeight: FontWeight.w600, color: text))),
+        ),
+      );
 }
 
-// ─── Input Box Decoration ─────────────────────────────────────────────────────
-BoxDecoration _inputDecoration() {
-  return BoxDecoration(
-    color: _kInputBg,
-    borderRadius: BorderRadius.circular(6),
-    border: Border.all(color: _kRed.withOpacity(0.5), width: 1),
-    boxShadow: const [
-      BoxShadow(
-        color: Color(0x80000000),
-        blurRadius: 6,
-        offset: Offset(0, 2),
-      ),
-    ],
-  );
-}
-
-// ─── Market Dropdown ──────────────────────────────────────────────────────────
-class _MarketDropdown extends StatelessWidget {
-  final String value;
-  final List<String> items;
-  final ValueChanged<String?> onChanged;
-
-  const _MarketDropdown({
-    required this.value,
-    required this.items,
-    required this.onChanged,
-  });
+class _AssetRemoveItem extends StatelessWidget {
+  final dynamic item;
+  final VoidCallback onRemove;
+  const _AssetRemoveItem({required this.item, required this.onRemove});
 
   @override
   Widget build(BuildContext context) {
+    final name = item['assetLabel'] as String? ?? item['assetId'] as String? ?? 'Unknown';
+    final symbol = item['assetId'] as String? ?? '';
+    final qty = item['quantity']?.toString() ?? '0';
+
     return Container(
-      height: 42,
-      decoration: _inputDecoration(),
-      padding: const EdgeInsets.symmetric(horizontal: 14),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: value,
-          items: items
-              .map((e) => DropdownMenuItem(
-                    value: e,
-                    child: Text(
-                      e,
-                      style: GoogleFonts.golosText(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w400,
-                        color: _kWhite,
-                      ),
-                    ),
-                  ))
-              .toList(),
-          onChanged: onChanged,
-          dropdownColor: _kInputBg,
-          icon: const Icon(Icons.keyboard_arrow_down,
-              color: _kWhite, size: 20),
-          isExpanded: true,
-          style: GoogleFonts.golosText(
-            fontSize: 14,
-            fontWeight: FontWeight.w400,
-            color: _kWhite,
+      height: 70,
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+          color: _kCard,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: _kDivider)),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: const BoxDecoration(color: _kBtn, shape: BoxShape.circle),
+            child: Center(
+                child: Text(symbol.isNotEmpty ? symbol[0] : '?',
+                    style: const TextStyle(color: _kWhite, fontSize: 16))),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-// ─── Preview Card ─────────────────────────────────────────────────────────────
-class _PreviewCard extends StatelessWidget {
-  final _AssetInfo asset;
-
-  const _PreviewCard({required this.asset});
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 250),
-      transitionBuilder: (child, animation) =>
-          FadeTransition(opacity: animation, child: child),
-      child: _PreviewCardContent(
-        key: ValueKey(asset.ticker),
-        asset: asset,
-      ),
-    );
-  }
-}
-
-class _PreviewCardContent extends StatelessWidget {
-  final _AssetInfo asset;
-
-  const _PreviewCardContent({super.key, required this.asset});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        // ── Coin header row ───────────────────────────────────────────────
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            ClipOval(
-              child: Image.asset(
-                asset.iconPath,
-                width: 30,
-                height: 30,
-                fit: BoxFit.cover,
-              ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(name, style: GoogleFonts.inter(fontSize: 15, color: _kWhite)),
+                Text('x$qty', style: GoogleFonts.inter(fontSize: 13, color: _kWhite80)),
+              ],
             ),
-            const SizedBox(width: 10),
-            RichText(
-              text: TextSpan(
-                children: [
-                  TextSpan(
-                    text: asset.coinName,
-                    style: const TextStyle(
-                      fontFamily: 'Franklin Gothic Demi',
-                      fontSize: 20,
-                      fontWeight: FontWeight.w400,
-                      color: _kWhite,
-                    ),
-                  ),
-                  TextSpan(
-                    text: ' (${asset.ticker})',
-                    style: GoogleFonts.golosText(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w400,
-                      color: _kGray,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const Spacer(),
-            Text(
-              asset.date,
-              style: GoogleFonts.inter(
-                fontSize: 14,
-                fontWeight: FontWeight.w400,
-                color: _kWhite,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 10),
-        // ── Divider ───────────────────────────────────────────────────────
-        Container(height: 1, color: _kBg),
-        const SizedBox(height: 14),
-        // ── Selling Price row ─────────────────────────────────────────────
-        Row(
-          children: [
-            Text(
-              'Selling Price',
-              style: GoogleFonts.golosText(
-                fontSize: 14,
-                fontWeight: FontWeight.w400,
-                color: _kGray,
-              ),
-            ),
-            const Spacer(),
-            Text(
-              '${asset.sellingPrice} Bath',
-              style: GoogleFonts.golosText(
-                fontSize: 14,
-                fontWeight: FontWeight.w400,
-                color: _kWhite,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        // ── Quantity row ──────────────────────────────────────────────────
-        Row(
-          children: [
-            Text(
-              'Quantity',
-              style: GoogleFonts.golosText(
-                fontSize: 14,
-                fontWeight: FontWeight.w400,
-                color: _kGray,
-              ),
-            ),
-            const Spacer(),
-            // Down arrow (rotated up_arrow.svg) in red
-            Transform.rotate(
-              angle: math.pi,
-              child: SvgPicture.asset(
-                'assets/icons/up_arrow.svg',
-                width: 8,
-                height: 5,
-                colorFilter: const ColorFilter.mode(_kRed, BlendMode.srcIn),
-              ),
-            ),
-            const SizedBox(width: 4),
-            Text(
-              '${asset.quantity} ${asset.ticker}',
-              style: GoogleFonts.golosText(
-                fontSize: 14,
-                fontWeight: FontWeight.w400,
-                color: _kWhite,
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-// ─── Remove Button ────────────────────────────────────────────────────────────
-class _RemoveButton extends StatelessWidget {
-  final VoidCallback onTap;
-  const _RemoveButton({required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: 46,
-        decoration: BoxDecoration(
-          color: _kRed,
-          borderRadius: BorderRadius.circular(6),
-        ),
-        alignment: Alignment.center,
-        child: Text(
-          'Remove',
-          style: GoogleFonts.golosText(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            color: _kDark,
           ),
-        ),
+          GestureDetector(
+            onTap: onRemove,
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                  color: _kRed.withOpacity(0.1), shape: BoxShape.circle),
+              child: const Icon(Icons.close, color: _kRed, size: 20),
+            ),
+          ),
+        ],
       ),
     );
   }

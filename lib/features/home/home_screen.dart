@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:trend_reversal_frontend/features/nagbar/nagbar.dart';
+import '../../core/currency_provider.dart';
+import '../../features/portfolio/portfolio_controller.dart';
 
 // ─── Design Tokens ────────────────────────────────────────────────────────────
 const Color _kBg = Color(0xFF121212);
@@ -130,10 +132,10 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               const SizedBox(height: 14),
               // ── App Bar ───────────────────────────────────────────────────
-              const _HomeAppBar(),
+              _HomeAppBar(),
               const SizedBox(height: 22),
               // ── Crypto Cards ──────────────────────────────────────────────
-              const _CryptoCardsList(),
+              _CryptoCardsList(),
               const SizedBox(height: 28),
               // ── Transactions ──────────────────────────────────────────────
               const _SectionDivider(label: 'Transactions'),
@@ -194,6 +196,31 @@ class _HomeAppBar extends StatelessWidget {
               color: _kWhite,
             ),
           ),
+          const Spacer(),
+          // Currency Toggle
+          GestureDetector(
+            onTap: () async {
+              await CurrencyProvider().toggleCurrency();
+              (context as Element).markNeedsBuild();
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              decoration: BoxDecoration(
+                color: _kCard,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: _kDivider),
+              ),
+              child: Text(
+                CurrencyProvider().currentCurrency,
+                style: GoogleFonts.inter(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: _kGreen,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 15),
           // Bell icon with red notification dot
           Stack(
             clipBehavior: Clip.none,
