@@ -1,0 +1,437 @@
+<svg viewBox="0 0 440 377" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0" y="0"><g id="candles">
+<g id="column">
+<g id="candles_2">
+<rect id="body" x="-0.733154" y="279" width="5" height="31" fill="#E4472B"/>
+<line id="bottom wick" x1="1.76685" y1="321" x2="1.76684" y2="270" stroke="#E4472B"/>
+</g>
+</g>
+<g id="column_2">
+<g id="candles_3">
+<rect id="body_2" x="5.4729" y="312" width="5" height="3" fill="#E4472B"/>
+<line id="bottom wick_2" x1="7.9729" y1="353" x2="7.9729" y2="308" stroke="#E4472B"/>
+</g>
+</g>
+<g id="column_3">
+<g id="candles_4">
+<rect id="body_3" x="11.679" y="308" width="5" height="7" fill="#E4472B"/>
+<line id="bottom wick_3" x1="14.179" y1="337" x2="14.179" y2="308" stroke="#E4472B"/>
+</g>
+</g>
+<g id="column_4">
+<g id="candles_5">
+<rect id="body_4" x="17.8853" y="310" width="5" height="4" fill="#E4472B"/>
+<line id="bottom wick_4" x1="20.3853" y1="321" x2="20.3853" y2="307" stroke="#E4472B"/>
+</g>
+</g>
+<g id="column_5">
+<g id="candles_6">
+<rect id="body_5" x="24.0913" y="306" width="5" height="4" fill="#47D5A6"/>
+<line id="bottom wick_5" x1="26.5913" y1="317" x2="26.5913" y2="303" stroke="#47D5A6"/>
+</g>
+</g>
+<g id="column_6">
+<g id="candles_7">
+<rect id="body_6" x="30.2974" y="306" width="5" height="4" fill="#E4472B"/>
+<line id="top wick" x1="32.7974" y1="316" x2="32.7974" y2="287" stroke="#E4472B"/>
+</g>
+</g>
+<g id="column_7">
+<g id="candles_8">
+<rect id="body_7" x="36.5034" y="283" width="5" height="35" fill="#47D5A6"/>
+<line id="bottom wick_6" x1="39.0034" y1="359" x2="39.0034" y2="277" stroke="#47D5A6"/>
+</g>
+</g>
+<g id="column_8">
+<g id="candles_9">
+<rect id="body_8" x="42.7095" y="280" width="5" height="9" fill="#47D5A6"/>
+<line id="bottom wick_7" x1="45.2095" y1="293" x2="45.2095" y2="260" stroke="#47D5A6"/>
+</g>
+</g>
+<g id="column_9">
+<g id="candles_10">
+<rect id="body_9" x="48.9155" y="280" width="5" height="9" fill="#E4472B"/>
+<line id="bottom wick_8" x1="51.4155" y1="293" x2="51.4155" y2="273" stroke="#E4472B"/>
+</g>
+</g>
+<g id="column_10">
+<g id="candles_11">
+<rect id="body_10" x="55.1216" y="281" width="5" height="3" fill="#E4472B"/>
+<line id="bottom wick_9" x1="57.6216" y1="303" x2="57.6216" y2="277" stroke="#E4472B"/>
+</g>
+</g>
+<g id="column_11">
+<g id="candles_12">
+<rect id="body_11" x="61.3276" y="280" width="5" height="26" fill="#E4472B"/>
+<line id="bottom wick_10" x1="63.8276" y1="293" x2="63.8276" y2="260" stroke="#E4472B"/>
+</g>
+</g>
+<g id="column_12">
+<g id="candles_13">
+<rect id="body_12" x="67.5339" y="280" width="5" height="57" fill="#E4472B"/>
+<line id="bottom wick_11" x1="70.0339" y1="293" x2="70.0339" y2="260" stroke="#E4472B"/>
+</g>
+</g>
+<g id="column_13">
+<g id="candles_14">
+<rect id="body_13" x="73.74" y="335" width="5" height="4" fill="#E4472B"/>
+<line id="bottom wick_12" x1="76.24" y1="346" x2="76.24" y2="331" stroke="#E4472B"/>
+</g>
+</g>
+<g id="column_14">
+<g id="candles_15">
+<rect id="body_14" x="79.946" y="331" width="5" height="6" fill="#E4472B"/>
+<line id="bottom wick_13" x1="82.446" y1="344" x2="82.446" y2="329" stroke="#E4472B"/>
+</g>
+</g>
+<g id="column_15">
+<g id="candles_16">
+<rect id="body_15" x="86.1521" y="330" width="5" height="4" fill="#E4472B"/>
+<line id="top wick_2" x1="88.6521" y1="339" x2="88.6521" y2="311" stroke="#E4472B"/>
+</g>
+</g>
+<g id="column_16">
+<g id="candles_17">
+<rect id="body_16" x="92.3582" y="326" width="5" height="26" fill="#E4472B"/>
+<line id="bottom wick_14" x1="94.8582" y1="352" x2="94.8582" y2="322" stroke="#E4472B"/>
+</g>
+</g>
+<g id="column_17">
+<g id="candles_18">
+<rect id="body_17" x="98.5642" y="319" width="5" height="31" fill="#47D5A6"/>
+<line id="bottom wick_15" x1="101.064" y1="361" x2="101.064" y2="311" stroke="#47D5A6"/>
+</g>
+</g>
+<g id="column_18">
+<g id="candles_19">
+<rect id="body_18" x="104.77" y="315" width="5" height="6" fill="#47D5A6"/>
+<line id="bottom wick_16" x1="107.27" y1="328" x2="107.27" y2="314" stroke="#47D5A6"/>
+</g>
+</g>
+<g id="column_19">
+<g id="candles_20">
+<rect id="body_19" x="110.977" y="295" width="5" height="31" fill="#47D5A6"/>
+<line id="top wick_3" x1="113.477" y1="330" x2="113.477" y2="276" stroke="#47D5A6"/>
+</g>
+</g>
+<g id="column_20">
+<g id="candles_21">
+<rect id="body_20" x="117.183" y="288" width="5" height="9" fill="#E4472B"/>
+<line id="bottom wick_17" x1="119.683" y1="301" x2="119.683" y2="281" stroke="#E4472B"/>
+</g>
+</g>
+<g id="column_21">
+<g id="candles_22">
+<rect id="body_21" width="5" height="6" transform="matrix(1, 0, 0, -1, 123.389, 292)" fill="#47D5A6"/>
+<line id="bottom wick_18" y1="-0.5" x2="9" y2="-0.5" transform="matrix(4.37115e-8, 1, 1, -4.37115e-8, 126.389, 279)" stroke="#47D5A6"/>
+</g>
+</g>
+<g id="column_22">
+<g id="candles_23">
+<rect id="body_22" x="129.595" y="280" width="5" height="9" fill="#47D5A6"/>
+<line id="bottom wick_19" x1="132.095" y1="293" x2="132.095" y2="260" stroke="#47D5A6"/>
+</g>
+</g>
+<g id="column_23">
+<g id="candles_24">
+<rect id="body_23" x="135.801" y="280" width="5" height="3" fill="#E4472B"/>
+<line id="bottom wick_20" x1="138.301" y1="321" x2="138.301" y2="276" stroke="#E4472B"/>
+</g>
+</g>
+<g id="column_24">
+<g id="candles_25">
+<rect id="body_24" x="142.007" y="282" width="5" height="4" fill="#E4472B"/>
+<line id="bottom wick_21" x1="144.507" y1="293" x2="144.507" y2="279" stroke="#E4472B"/>
+</g>
+</g>
+<g id="column_25">
+<g id="candles_26">
+<rect id="body_25" width="5" height="6" transform="matrix(1, 0, 0, -1, 148.213, 292)" fill="#47D5A6"/>
+<line id="bottom wick_22" x1="150.713" y1="294" x2="150.713" y2="279" stroke="#47D5A6"/>
+</g>
+</g>
+<g id="column_26">
+<g id="candles_27">
+<rect id="body_26" x="154.419" y="269" width="5" height="33" fill="#47D5A6"/>
+<line id="bottom wick_23" x1="156.919" y1="305.045" x2="156.919" y2="294" stroke="#47D5A6"/>
+</g>
+</g>
+<g id="column_27">
+<g id="candles_28">
+<rect id="body_27" x="160.625" y="269" width="5" height="8" fill="#47D5A6"/>
+<line id="bottom wick_24" x1="163.125" y1="305" x2="163.125" y2="276" stroke="#47D5A6"/>
+</g>
+</g>
+<g id="column_28">
+<g id="candles_29">
+<rect id="body_28" x="166.831" y="267" width="5" height="9" fill="#47D5A6"/>
+<line id="bottom wick_25" x1="169.331" y1="280" x2="169.331" y2="247" stroke="#47D5A6"/>
+</g>
+</g>
+<g id="column_29">
+<g id="candles_30">
+<rect id="body_29" x="173.037" y="260" width="5" height="3" fill="#47D5A6"/>
+<line id="bottom wick_26" x1="175.537" y1="286" x2="175.537" y2="241" stroke="#47D5A6"/>
+</g>
+</g>
+<g id="column_30">
+<g id="candles_31">
+<rect id="body_30" x="179.243" y="207" width="5" height="31" fill="#47D5A6"/>
+<line id="top wick_4" x1="181.743" y1="207.04500000000002" x2="181.743" y2="196" stroke="#47D5A6"/>
+<line id="bottom wick_27" x1="181.743" y1="291" x2="181.743" y2="238" stroke="#47D5A6"/>
+</g>
+</g>
+<g id="column_31">
+<g id="candles_32">
+<rect id="body_31" x="185.449" y="191" width="5" height="31" fill="#47D5A6"/>
+<line id="top wick_5" x1="187.949" y1="230" x2="187.949" y2="180" stroke="#47D5A6"/>
+</g>
+</g>
+<g id="column_32">
+<g id="candles_33">
+<rect id="body_32" x="191.656" y="187" width="5" height="9" fill="#47D5A6"/>
+<line id="bottom wick_28" x1="194.156" y1="200" x2="194.156" y2="167" stroke="#47D5A6"/>
+</g>
+</g>
+<g id="column_33">
+<g id="candles_34">
+<rect id="body_33" x="197.862" y="187" width="5" height="4" fill="#47D5A6"/>
+<line id="bottom wick_29" x1="200.362" y1="200" x2="200.362" y2="167" stroke="#47D5A6"/>
+</g>
+</g>
+<g id="column_34">
+<g id="candles_35">
+<rect id="body_34" x="204.068" y="188" width="5" height="3" fill="#E4472B"/>
+<line id="bottom wick_30" x1="206.568" y1="210" x2="206.568" y2="184" stroke="#E4472B"/>
+</g>
+</g>
+<g id="column_35">
+<g id="candles_36">
+<rect id="body_35" x="210.274" y="189" width="5" height="4" fill="#E4472B"/>
+<line id="bottom wick_31" x1="212.774" y1="200" x2="212.774" y2="187" stroke="#E4472B"/>
+</g>
+</g>
+<g id="column_36">
+<g id="candles_37">
+<rect id="body_36" x="216.48" y="240" width="5" height="26" fill="#E4472B"/>
+<line id="bottom wick_32" x1="218.98" y1="253" x2="218.98" y2="220" stroke="#E4472B"/>
+</g>
+</g>
+<g id="column_37">
+<g id="candles_38">
+<rect id="body_37" x="222.686" y="251" width="5" height="9" fill="#47D5A6"/>
+<line id="bottom wick_33" x1="225.186" y1="280" x2="225.186" y2="247" stroke="#47D5A6"/>
+</g>
+</g>
+<g id="column_38">
+<g id="candles_39">
+<rect id="body_38" x="228.892" y="248" width="5" height="3" fill="#47D5A6"/>
+<line id="bottom wick_34" x1="231.392" y1="274" x2="231.392" y2="229" stroke="#47D5A6"/>
+</g>
+</g>
+<g id="column_39">
+<g id="candles_40">
+<rect id="body_39" x="235.098" y="220" width="5" height="42" fill="#E4472B"/>
+<line id="top wick_6" x1="237.598" y1="231.04500000000002" x2="237.598" y2="220" stroke="#E4472B"/>
+<line id="bottom wick_35" x1="237.598" y1="273.045" x2="237.598" y2="262" stroke="#E4472B"/>
+</g>
+</g>
+<g id="column_40">
+<g id="candles_41">
+<rect id="body_40" x="241.304" y="247" width="5" height="14" fill="#E4472B"/>
+<line id="bottom wick_36" x1="243.804" y1="272" x2="243.804" y2="239" stroke="#E4472B"/>
+</g>
+</g>
+<g id="column_41">
+<g id="candles_42">
+<rect id="body_41" x="247.51" y="255" width="5" height="31" fill="#E4472B"/>
+<line id="bottom wick_37" x1="250.01" y1="297" x2="250.01" y2="248" stroke="#E4472B"/>
+</g>
+</g>
+<g id="column_42">
+<g id="candles_43">
+<rect id="body_42" x="253.716" y="269" width="5" height="8" fill="#E4472B"/>
+<line id="bottom wick_38" x1="256.216" y1="305" x2="256.216" y2="276" stroke="#E4472B"/>
+</g>
+</g>
+<g id="column_43">
+<g id="candles_44">
+<rect id="body_43" x="259.922" y="288" width="5" height="9" fill="#E4472B"/>
+<line id="bottom wick_39" x1="262.422" y1="301" x2="262.422" y2="281" stroke="#E4472B"/>
+</g>
+</g>
+<g id="column_44">
+<g id="candles_45">
+<rect id="body_44" x="266.129" y="269" width="5" height="33" fill="#47D5A6"/>
+<line id="bottom wick_40" x1="268.629" y1="320" x2="268.629" y2="294" stroke="#47D5A6"/>
+</g>
+</g>
+<g id="column_45">
+<g id="candles_46">
+<rect id="body_45" x="272.335" y="240" width="5" height="62" fill="#47D5A6"/>
+<line id="bottom wick_41" x1="274.835" y1="305" x2="274.835" y2="294" stroke="#47D5A6"/>
+</g>
+</g>
+<g id="column_46">
+<g id="candles_47">
+<rect id="body_46" x="278.541" y="224" width="5" height="26" fill="#E4472B"/>
+<line id="bottom wick_42" x1="281.041" y1="237" x2="281.041" y2="204" stroke="#E4472B"/>
+</g>
+</g>
+<g id="column_47">
+<g id="candles_48">
+<rect id="body_47" x="284.747" y="205" width="5" height="31" fill="#47D5A6"/>
+<line id="bottom wick_43" x1="287.247" y1="247" x2="287.247" y2="197" stroke="#47D5A6"/>
+</g>
+</g>
+<g id="column_48">
+<g id="candles_49">
+<rect id="body_48" x="290.953" y="204" width="5" height="31" fill="#47D5A6"/>
+<line id="bottom wick_44" x1="293.453" y1="288" x2="293.453" y2="195" stroke="#47D5A6"/>
+</g>
+</g>
+<g id="column_49">
+<g id="candles_50">
+<rect id="body_49" x="297.159" y="203" width="5" height="9" fill="#47D5A6"/>
+<line id="bottom wick_45" x1="299.659" y1="216" x2="299.659" y2="183" stroke="#47D5A6"/>
+</g>
+</g>
+<g id="column_50">
+<g id="candles_51">
+<rect id="body_50" x="303.365" y="156" width="5" height="42" fill="#47D5A6"/>
+<line id="top wick_7" x1="305.865" y1="167.04500000000002" x2="305.865" y2="156" stroke="#47D5A6"/>
+<line id="bottom wick_46" x1="305.865" y1="209.04500000000002" x2="305.865" y2="198" stroke="#47D5A6"/>
+</g>
+</g>
+<g id="column_51">
+<g id="candles_52">
+<rect id="body_51" x="309.571" y="148" width="5" height="11" fill="#47D5A6"/>
+<line id="top wick_8" x1="312.071" y1="182" x2="312.071" y2="137" stroke="#47D5A6"/>
+</g>
+</g>
+<g id="column_52">
+<g id="candles_53">
+<rect id="body_52" x="315.777" y="144" width="5" height="9" fill="#E4472B"/>
+<line id="bottom wick_47" x1="318.277" y1="157" x2="318.277" y2="137" stroke="#E4472B"/>
+</g>
+</g>
+<g id="column_53">
+<g id="candles_54">
+<rect id="body_53" x="321.983" y="144" width="5" height="26" fill="#E4472B"/>
+<line id="bottom wick_48" x1="324.483" y1="157" x2="324.483" y2="124" stroke="#E4472B"/>
+</g>
+</g>
+<g id="column_54">
+<g id="candles_55">
+<rect id="body_54" x="328.189" y="145" width="5" height="3" fill="#E4472B"/>
+<line id="bottom wick_49" x1="330.689" y1="167" x2="330.689" y2="141" stroke="#E4472B"/>
+</g>
+</g>
+<g id="column_55">
+<g id="candles_56">
+<rect id="body_55" x="334.396" y="143" width="5" height="9" fill="#47D5A6"/>
+<line id="bottom wick_50" x1="336.896" y1="156" x2="336.896" y2="123" stroke="#47D5A6"/>
+</g>
+</g>
+<g id="column_56">
+<g id="candles_57">
+<rect id="body_56" x="340.602" y="149" width="5" height="26" fill="#E4472B"/>
+<line id="bottom wick_51" x1="343.102" y1="162" x2="343.102" y2="129" stroke="#E4472B"/>
+</g>
+</g>
+<g id="column_57">
+<g id="candles_58">
+<rect id="body_57" x="346.808" y="149" width="5" height="40" fill="#E4472B"/>
+<line id="bottom wick_52" x1="349.308" y1="162" x2="349.308" y2="129" stroke="#E4472B"/>
+</g>
+</g>
+<g id="column_58">
+<g id="candles_59">
+<rect id="body_58" x="353.014" y="189" width="5" height="4" fill="#E4472B"/>
+<line id="bottom wick_53" x1="355.514" y1="200" x2="355.514" y2="187" stroke="#E4472B"/>
+</g>
+</g>
+<g id="column_59">
+<g id="candles_60">
+<rect id="body_59" x="359.22" y="188" width="5" height="11" fill="#47D5A6"/>
+<line id="top wick_9" x1="361.72" y1="222" x2="361.72" y2="177" stroke="#47D5A6"/>
+</g>
+</g>
+<g id="column_60">
+<g id="candles_61">
+<rect id="body_60" x="365.426" y="220" width="5" height="42" fill="#E4472B"/>
+<line id="top wick_10" x1="367.926" y1="231.04500000000002" x2="367.926" y2="220" stroke="#E4472B"/>
+<line id="bottom wick_54" x1="367.926" y1="273.045" x2="367.926" y2="262" stroke="#E4472B"/>
+</g>
+</g>
+<g id="column_61">
+<g id="candles_62">
+<rect id="body_61" x="371.632" y="247" width="5" height="14" fill="#E4472B"/>
+<line id="bottom wick_55" x1="374.132" y1="272" x2="374.132" y2="239" stroke="#E4472B"/>
+</g>
+</g>
+<g id="column_62">
+<g id="candles_63">
+<rect id="body_62" x="377.838" y="255" width="5" height="31" fill="#E4472B"/>
+<line id="bottom wick_56" x1="380.338" y1="297" x2="380.338" y2="248" stroke="#E4472B"/>
+</g>
+</g>
+<g id="column_63">
+<g id="candles_64">
+<rect id="body_63" x="384.044" y="288" width="5" height="9" fill="#E4472B"/>
+<line id="bottom wick_57" x1="386.544" y1="301" x2="386.544" y2="281" stroke="#E4472B"/>
+</g>
+</g>
+<g id="column_64">
+<g id="candles_65">
+<rect id="body_64" x="390.25" y="288" width="5" height="9" fill="#47D5A6"/>
+<line id="bottom wick_58" x1="392.75" y1="297" x2="392.75" y2="281" stroke="#47D5A6"/>
+</g>
+</g>
+<g id="column_65">
+<g id="candles_66">
+<rect id="body_65" x="396.456" y="280" width="5" height="13" fill="#47D5A6"/>
+<line id="bottom wick_59" x1="398.956" y1="293" x2="398.956" y2="277" stroke="#47D5A6"/>
+</g>
+</g>
+<g id="column_66">
+<g id="candles_67">
+<rect id="body_66" x="402.662" y="281" width="5" height="3" fill="#E4472B"/>
+<line id="bottom wick_60" x1="405.162" y1="294" x2="405.162" y2="274" stroke="#E4472B"/>
+</g>
+</g>
+<g id="column_67">
+<g id="candles_68">
+<rect id="body_67" x="408.869" y="279" width="5" height="12" fill="#47D5A6"/>
+<line id="bottom wick_61" x1="411.369" y1="297" x2="411.369" y2="241" stroke="#47D5A6"/>
+</g>
+</g>
+<g id="column_68">
+<g id="candles_69">
+<rect id="body_68" x="415.075" y="289" width="5" height="3" fill="#47D5A6"/>
+<line id="bottom wick_62" x1="417.575" y1="293" x2="417.575" y2="229" stroke="#47D5A6"/>
+</g>
+</g>
+<g id="column_69">
+<g id="candles_70">
+<rect id="body_69" x="421.281" y="204" width="5" height="31" fill="#47D5A6"/>
+<line id="bottom wick_63" x1="423.781" y1="288" x2="423.781" y2="195" stroke="#47D5A6"/>
+</g>
+</g>
+<g id="column_70">
+<g id="candles_71">
+<rect id="body_70" x="427.487" y="199" width="5" height="14" fill="#E4472B"/>
+<line id="bottom wick_64" x1="429.987" y1="224" x2="429.987" y2="191" stroke="#E4472B"/>
+</g>
+</g>
+<g id="column_71">
+<g id="candles_72">
+<rect id="body_71" x="433.693" y="205" width="5" height="40" fill="#E4472B"/>
+<line id="bottom wick_65" x1="436.193" y1="218" x2="436.193" y2="185" stroke="#E4472B"/>
+</g>
+</g>
+<g id="column_72">
+<g id="candles_73">
+<rect id="body_72" x="439.899" y="245" width="5" height="4" fill="#E4472B"/>
+</g>
+</g>
+</g></svg>
