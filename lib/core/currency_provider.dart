@@ -39,7 +39,7 @@ class CurrencyProvider extends ChangeNotifier {
 
   String formatValue(double value) {
     final converted = convert(value);
-    final symbol = _currentCurrency == 'THB' ? 'THB' : '$';
+    final symbol = _currentCurrency == 'THB' ? 'THB' : '\$';
     if (_currentCurrency == 'THB') {
       return '${converted.toStringAsFixed(0)} $symbol';
     }
