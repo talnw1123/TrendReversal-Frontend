@@ -3,6 +3,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'register_screen.dart';
+import '../../core/auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -18,6 +19,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final FocusNode _passwordFocusNode = FocusNode();
   bool _rememberDevice = false;
   bool _obscurePassword = true;
+  bool _loading = false;
   late final TapGestureRecognizer _registerRecognizer;
 
   @override
@@ -32,6 +34,32 @@ class _LoginScreenState extends State<LoginScreen> {
     _registerRecognizer = TapGestureRecognizer()..onTap = () {
       Navigator.push(context, MaterialPageRoute(builder: (context) => const RegisterScreen()));
     };
+  }
+
+  Future<void> _handleLogin() async {
+    final email = _emailController.text.trim();
+    final pass  = _passwordController.text;
+
+    if (email.isEmpty || pass.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('กรุณากรอก Email และ Password')),
+      );
+      return;
+    }
+
+    setState(() => _loading = true);
+    final ok = await AuthService().login(email, pass);
+    if (mounted) setState(() => _loading = false);
+
+    if (ok) {
+      if (mounted) Navigator.pushReplacementNamed(context, '/home');
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('เข้าสู่ระบบไม่สำเร็จ กรุณาตรวจสอบข้อมูล')),
+        );
+      }
+    }
   }
 
   @override
@@ -262,9 +290,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   width: double.infinity,
                   height: 49,
                   child: ElevatedButton(
-                    onPressed: () {
-                      // Handle sign in
-                    },
+                    onPressed: _loading ? null : _handleLogin,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFFE0543D),
                       shape: RoundedRectangleBorder(
@@ -272,14 +298,23 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       elevation: 0,
                     ),
-                    child: Text(
-                      'Sign in',
-                      style: GoogleFonts.golosText(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        color: const Color(0xFF050505),
-                      ),
-                    ),
+                    child: _loading
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              color: Color(0xFF050505),
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : Text(
+                            'Sign in',
+                            style: GoogleFonts.golosText(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: const Color(0xFF050505),
+                            ),
+                          ),
                   ),
                 ),
                 const SizedBox(height: 33),

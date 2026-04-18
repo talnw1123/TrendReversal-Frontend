@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'chat_screen.dart';
+import 'historychat_screen.dart';
 
 // ─── Design tokens ─────────────────────────────────────────────────────────
 const Color _bgPrimary = Color(0xFF121212);
 const Color _surfaceCard = Color(0xFF282828);
 const Color _textPrimary = Colors.white;
-const Color _textSecondary = Color(0xFFCCCCCC); // white 80%
-const Color _textHint = Color(0xFF808080); // white 50%
 
 // ─── Suggested questions mock data ─────────────────────────────────────────
 const List<String> _suggestedQuestions = [
@@ -35,6 +35,16 @@ class _AiAgentScreenState extends State<AiAgentScreen> {
     super.dispose();
   }
 
+  void _startChat(String message) {
+    if (message.trim().isEmpty) return;
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ChatScreen(initialMessage: message),
+      ),
+    );
+  }
+
   void _showPromptGuidance() {
     showModalBottomSheet(
       context: context,
@@ -43,7 +53,7 @@ class _AiAgentScreenState extends State<AiAgentScreen> {
       builder: (_) => _PromptGuidanceSheet(
         onQuestionSelected: (q) {
           Navigator.pop(context);
-          setState(() => _inputController.text = q);
+          _startChat(q);
         },
       ),
     );
@@ -57,7 +67,14 @@ class _AiAgentScreenState extends State<AiAgentScreen> {
         child: Column(
           children: [
             // ── App Header ──────────────────────────────────────────────
-            _AppHeader(),
+            _AppHeader(
+              onHistoryTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const HistoryChatScreen()),
+                );
+              },
+            ),
             // ── Hero + Input ─────────────────────────────────────────────
             Expanded(
               child: Padding(
@@ -87,21 +104,18 @@ class _AiAgentScreenState extends State<AiAgentScreen> {
                     ),
                     const SizedBox(height: 24),
                     // Input field
-                    _ChatInputField(controller: _inputController),
+                    _ChatInputField(
+                      controller: _inputController,
+                      onSubmitted: _startChat,
+                    ),
                     const SizedBox(height: 18),
                     // Prompt Guidance button
                     GestureDetector(
                       onTap: _showPromptGuidance,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 18,
-                          vertical: 8,
-                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
                         decoration: BoxDecoration(
-                          border: Border.all(
-                            color: Colors.white.withOpacity(0.4),
-                            width: 1,
-                          ),
+                          border: Border.all(color: Colors.white.withOpacity(0.4), width: 1),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
@@ -130,13 +144,15 @@ class _AiAgentScreenState extends State<AiAgentScreen> {
 // _AppHeader
 // ═══════════════════════════════════════════════════════════════════════════
 class _AppHeader extends StatelessWidget {
+  final VoidCallback onHistoryTap;
+  const _AppHeader({required this.onHistoryTap});
+
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       child: Row(
         children: [
-          // Profile avatar – rounded square
           ClipRRect(
             borderRadius: BorderRadius.circular(10),
             child: Image.asset(
@@ -146,7 +162,6 @@ class _AppHeader extends StatelessWidget {
               fit: BoxFit.cover,
             ),
           ),
-          // Title centered
           const Expanded(
             child: Center(
               child: Text(
@@ -160,12 +175,14 @@ class _AppHeader extends StatelessWidget {
               ),
             ),
           ),
-          // History / clock icon
-          Image.asset(
-            'assets/icons/history_icon.png',
-            width: 25,
-            height: 25,
-            color: Colors.white,
+          GestureDetector(
+            onTap: onHistoryTap,
+            child: Image.asset(
+              'assets/icons/history_icon.png',
+              width: 25,
+              height: 25,
+              color: Colors.white,
+            ),
           ),
         ],
       ),
@@ -178,8 +195,9 @@ class _AppHeader extends StatelessWidget {
 // ═══════════════════════════════════════════════════════════════════════════
 class _ChatInputField extends StatelessWidget {
   final TextEditingController controller;
+  final Function(String) onSubmitted;
 
-  const _ChatInputField({required this.controller});
+  const _ChatInputField({required this.controller, required this.onSubmitted});
 
   @override
   Widget build(BuildContext context) {
@@ -195,18 +213,11 @@ class _ChatInputField extends StatelessWidget {
           Expanded(
             child: TextField(
               controller: controller,
-              style: GoogleFonts.inter(
-                fontSize: 15,
-                fontWeight: FontWeight.w400,
-                color: _textPrimary,
-              ),
+              onSubmitted: onSubmitted,
+              style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w400, color: _textPrimary),
               decoration: InputDecoration(
                 hintText: 'Ask anythink. Type for trade',
-                hintStyle: GoogleFonts.inter(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w400,
-                  color: Colors.white.withOpacity(0.5),
-                ),
+                hintStyle: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w400, color: Colors.white.withOpacity(0.5)),
                 border: InputBorder.none,
                 isDense: true,
                 contentPadding: EdgeInsets.zero,
@@ -214,109 +225,47 @@ class _ChatInputField extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
-          Image.asset(
-            'assets/icons/microphone_icon.png',
-            width: 20,
-            height: 20,
-            color: Colors.white.withOpacity(0.7),
-          ),
+          Image.asset('assets/icons/microphone_icon.png', width: 20, height: 20, color: Colors.white.withOpacity(0.7)),
         ],
       ),
     );
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// _PromptGuidanceSheet  (bottom sheet content)
-// ═══════════════════════════════════════════════════════════════════════════
 class _PromptGuidanceSheet extends StatelessWidget {
   final ValueChanged<String> onQuestionSelected;
-
   const _PromptGuidanceSheet({required this.onQuestionSelected});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
-        color: _bgPrimary,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(10)),
-      ),
+      decoration: const BoxDecoration(color: _bgPrimary, borderRadius: BorderRadius.vertical(top: Radius.circular(10))),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           const SizedBox(height: 8),
-          // Drag handle
-          Center(
-            child: Container(
-              width: 190,
-              height: 4,
-              decoration: BoxDecoration(
-                color: _surfaceCard,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
+          Center(child: Container(width: 190, height: 4, decoration: BoxDecoration(color: _surfaceCard, borderRadius: BorderRadius.circular(2)))),
           const SizedBox(height: 20),
-          // Title row
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Stack(
               alignment: Alignment.center,
               children: [
-                const SizedBox(width: double.infinity),
-                // Title + subtitle centered
                 Column(
                   children: [
-                    Text(
-                      'Suggested Questions',
-                      style: GoogleFonts.inter(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        color: _textPrimary,
-                      ),
-                    ),
+                    Text('Suggested Questions', style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w400, color: _textPrimary)),
                     const SizedBox(height: 6),
-                    Text(
-                      'Choose a question to ask Quantix',
-                      style: GoogleFonts.inter(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w400,
-                        color: Colors.white.withOpacity(0.5),
-                      ),
-                    ),
+                    Text('Choose a question to ask Quantix', style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w400, color: Colors.white.withOpacity(0.5))),
                   ],
                 ),
-                // Close button top-right
-                Positioned(
-                  right: 0,
-                  top: 0,
-                  child: GestureDetector(
-                    onTap: () => Navigator.pop(context),
-                    child: Image.asset(
-                      'assets/icons/close_icon.png',
-                      width: 20,
-                      height: 20,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
+                Positioned(right: 0, top: 0, child: GestureDetector(onTap: () => Navigator.pop(context), child: Image.asset('assets/icons/close_icon.png', width: 20, height: 20, color: Colors.white))),
               ],
             ),
           ),
           const SizedBox(height: 24),
-          // Question cards
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Column(
-              children: _suggestedQuestions
-                  .map(
-                    (q) => _SuggestedQuestionItem(
-                      question: q,
-                      onTap: () => onQuestionSelected(q),
-                    ),
-                  )
-                  .toList(),
-            ),
+            child: Column(children: _suggestedQuestions.map((q) => _SuggestedQuestionItem(question: q, onTap: () => onQuestionSelected(q))).toList()),
           ),
           const SizedBox(height: 30),
         ],
@@ -325,38 +274,22 @@ class _PromptGuidanceSheet extends StatelessWidget {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// _SuggestedQuestionItem
-// ═══════════════════════════════════════════════════════════════════════════
 class _SuggestedQuestionItem extends StatelessWidget {
   final String question;
   final VoidCallback onTap;
-
   const _SuggestedQuestionItem({required this.question, required this.onTap});
 
   @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
-          decoration: BoxDecoration(
-            border: Border.all(color: _surfaceCard, width: 1),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Text(
-            question,
-            style: GoogleFonts.inter(
-              fontSize: 16,
-              fontWeight: FontWeight.w400,
-              color: _textPrimary,
-            ),
-          ),
-        ),
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(bottom: 12),
+    child: GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+        decoration: BoxDecoration(border: Border.all(color: _surfaceCard, width: 1), borderRadius: BorderRadius.circular(10)),
+        child: Text(question, style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w400, color: _textPrimary)),
       ),
-    );
-  }
+    ),
+  );
 }

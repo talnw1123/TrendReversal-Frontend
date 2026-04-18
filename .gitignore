@@ -43,8 +43,3 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
-
-# Extra IGNORES
-link_no_space/
-analyze_output.txt
-.env

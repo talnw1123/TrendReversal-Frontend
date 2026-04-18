@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:trend_reversal_frontend/features/nagbar/nagbar.dart';
 import '../../core/currency_provider.dart';
-import '../../features/portfolio/portfolio_controller.dart';
+import '../../shared/widgets/currency_toggle.dart';
+import '../portfolio/portfolio_controller.dart';
+import '../portfolio/portfolioadd_screen.dart';
+import '../portfolio/portfolioremove_screen.dart';
+import '../portfolio/portfolio_screen.dart';
 
 // ─── Design Tokens ────────────────────────────────────────────────────────────
 const Color _kBg = Color(0xFF121212);
@@ -113,17 +116,10 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int _selectedIndex = 0;
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: _kBg,
-      bottomNavigationBar: AppNavBar(
-        selectedIndex: _selectedIndex,
-        onTabSelected: (index) => setState(() => _selectedIndex = index),
-        onCenterTap: () {},
-      ),
       body: SafeArea(
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
@@ -132,10 +128,10 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               const SizedBox(height: 14),
               // ── App Bar ───────────────────────────────────────────────────
-              _HomeAppBar(),
+              const _HomeAppBar(),
               const SizedBox(height: 22),
               // ── Crypto Cards ──────────────────────────────────────────────
-              _CryptoCardsList(),
+              const _CryptoCardsList(),
               const SizedBox(height: 28),
               // ── Transactions ──────────────────────────────────────────────
               const _SectionDivider(label: 'Transactions'),
@@ -188,39 +184,20 @@ class _HomeAppBar extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            'Quantix',
-            style: GoogleFonts.inter(
-              fontSize: 18,
-              fontWeight: FontWeight.w400,
-              color: _kWhite,
-            ),
-          ),
-          const Spacer(),
-          // Currency Toggle
-          GestureDetector(
-            onTap: () async {
-              await CurrencyProvider().toggleCurrency();
-              (context as Element).markNeedsBuild();
-            },
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-              decoration: BoxDecoration(
-                color: _kCard,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: _kDivider),
-              ),
-              child: Text(
-                CurrencyProvider().currentCurrency,
+          Row(
+            children: [
+              Text(
+                'Quantix',
                 style: GoogleFonts.inter(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: _kGreen,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w400,
+                  color: _kWhite,
                 ),
               ),
-            ),
+              const SizedBox(width: 12),
+              const CurrencyToggle(),
+            ],
           ),
-          const SizedBox(width: 15),
           // Bell icon with red notification dot
           Stack(
             clipBehavior: Clip.none,
@@ -335,14 +312,21 @@ class _CryptoCard extends StatelessWidget {
                                 ),
                                 overflow: TextOverflow.ellipsis,
                               ),
-                              const SizedBox(height: 4),
-                              Text(
-                                data.price,
-                                style: GoogleFonts.inter(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w400,
-                                  color: _kWhite,
-                                ),
+                              ListenableBuilder(
+                                listenable: CurrencyProvider(),
+                                builder: (context, _) {
+                                  // Strip commas and " Bath" to get numeric value
+                                  final cleanPrice = data.price.replaceAll(',', '').replaceAll(' Bath', '');
+                                  final val = double.tryParse(cleanPrice) ?? 0;
+                                  return Text(
+                                    CurrencyProvider().formatValue(val),
+                                    style: GoogleFonts.inter(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w400,
+                                      color: _kWhite,
+                                    ),
+                                  );
+                                },
                               ),
                             ],
                           ),
@@ -532,169 +516,233 @@ class _TransactionItem extends StatelessWidget {
 // ═══════════════════════════════════════════════════════════════════════════════
 // _PortfolioCard
 // ═══════════════════════════════════════════════════════════════════════════════
-class _PortfolioCard extends StatelessWidget {
+class _PortfolioCard extends StatefulWidget {
   const _PortfolioCard();
 
   @override
+  State<_PortfolioCard> createState() => _PortfolioCardState();
+}
+
+class _PortfolioCardState extends State<_PortfolioCard> {
+  Map<String, dynamic>? _summary;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchData();
+  }
+
+  Future<void> _fetchData() async {
+    final data = await PortfolioController().getPortfolioData();
+    if (mounted) {
+      setState(() {
+        _summary = data?['summary'];
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: _kCard,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      padding: const EdgeInsets.fromLTRB(24, 20, 24, 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // ── Row: Current Balance label + Bath badge ───────────────────────
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Current Balance',
-                style: GoogleFonts.inter(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  color: _kWhite80,
-                ),
-              ),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: _kDarkCard,
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Text(
-                  'Bath',
-                  style: GoogleFonts.inter(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w500,
-                    color: _kWhite,
-                  ),
-                ),
-              ),
-            ],
+    if (_isLoading) {
+      return Container(
+        height: 180,
+        decoration: BoxDecoration(
+          color: _kCard,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: const Center(
+          child: CircularProgressIndicator(color: _kRed),
+        ),
+      );
+    }
+
+    final totalCost = (_summary?['totalCost'] as num?)?.toDouble() ?? 0.0;
+    final currentValue = (_summary?['currentValue'] as num?)?.toDouble() ?? 0.0;
+    final totalProfit = (_summary?['totalProfit'] as num?)?.toDouble() ?? 0.0;
+    final profitPercent = (_summary?['totalProfitPercent'] as num?)?.toDouble() ?? 0.0;
+
+    return ListenableBuilder(
+      listenable: CurrencyProvider(),
+      builder: (context, _) {
+        final currency = CurrencyProvider().currentCurrency;
+        final isPositive = totalProfit >= 0;
+
+        return Container(
+          decoration: BoxDecoration(
+            color: _kCard,
+            borderRadius: BorderRadius.circular(20),
           ),
-          const SizedBox(height: 8),
-          // ── Balance value + % indicator ───────────────────────────────────
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
+          padding: const EdgeInsets.fromLTRB(24, 20, 24, 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                '202,000.40',
-                style: GoogleFonts.inter(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
-                  color: _kWhite,
-                ),
-              ),
-              const SizedBox(width: 12),
+              // ── Row: Current Balance label + Currency badge ─────────────────
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Image.asset(
-                    'assets/images/right_arrow.png',
-                    width: 10,
-                    height: 10,
-                    color: _kGreen,
-                  ),
-                  const SizedBox(width: 2),
                   Text(
-                    '+1.77%',
+                    'Current Balance',
                     style: GoogleFonts.inter(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w400,
-                      color: _kGreen,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: _kWhite80,
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: _kDarkCard,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      currency == 'THB' ? 'Bath' : 'USD',
+                      style: GoogleFonts.inter(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
+                        color: _kWhite,
+                      ),
                     ),
                   ),
                 ],
               ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          // ── Invested Balance | Total Profit ───────────────────────────────
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Invested Balance',
-                style: GoogleFonts.inter(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: _kWhite80,
-                ),
-              ),
-              Text(
-                'Total Profit',
-                style: GoogleFonts.inter(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: _kWhite80,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                '182,000.40',
-                style: GoogleFonts.inter(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                  color: _kWhite,
-                ),
-              ),
+              const SizedBox(height: 8),
+              // ── Balance value + % indicator ─────────────────────────────────
               Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  SvgPicture.asset(
-                    'assets/icons/uptrend_arrow.svg',
-                    width: 9,
-                    height: 5,
-                    colorFilter: const ColorFilter.mode(
-                      _kGreen,
-                      BlendMode.srcIn,
+                  Text(
+                    CurrencyProvider().formatValue(currentValue, includeSymbol: false),
+                    style: GoogleFonts.inter(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                      color: _kWhite,
                     ),
                   ),
-                  const SizedBox(width: 4),
+                  const SizedBox(width: 12),
+                  Row(
+                    children: [
+                      Image.asset(
+                        'assets/images/right_arrow.png',
+                        width: 10,
+                        height: 10,
+                        color: isPositive ? _kGreen : _kRed,
+                      ),
+                      const SizedBox(width: 2),
+                      Text(
+                        '${isPositive ? '+' : ''}${profitPercent.toStringAsFixed(2)}%',
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w400,
+                          color: isPositive ? _kGreen : _kRed,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              // ── Invested Balance | Total Profit ─────────────────────────────
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
                   Text(
-                    '+20,000.00',
+                    'Invested Balance',
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: _kWhite80,
+                    ),
+                  ),
+                  Text(
+                    'Total Profit',
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: _kWhite80,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    CurrencyProvider().formatValue(totalCost, includeSymbol: false),
                     style: GoogleFonts.inter(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
                       color: _kWhite,
                     ),
                   ),
+                  Row(
+                    children: [
+                      SvgPicture.asset(
+                        'assets/icons/uptrend_arrow.svg',
+                        width: 9,
+                        height: 5,
+                        colorFilter: ColorFilter.mode(
+                          isPositive ? _kGreen : _kRed,
+                          BlendMode.srcIn,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${isPositive ? '+' : ''}${CurrencyProvider().formatValue(totalProfit, includeSymbol: false)}',
+                        style: GoogleFonts.inter(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: _kWhite,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              // ── Action buttons ──────────────────────────────────────────────
+              Row(
+                children: [
+                  _ActionButton(
+                    iconPath: 'assets/images/add_icon.png',
+                    label: 'Add',
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const PortfolioAddScreen()),
+                      ).then((_) => _fetchData());
+                    },
+                  ),
+                  const SizedBox(width: 15),
+                  _ActionButton(
+                    iconPath: 'assets/images/remove_icon.png',
+                    label: 'Remove',
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const PortfolioRemoveScreen()),
+                      ).then((_) => _fetchData());
+                    },
+                  ),
+                  const SizedBox(width: 15),
+                  _ActionButton(
+                    iconPath: 'assets/images/assets_icon.png',
+                    label: 'Assets',
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const PortfolioScreen()),
+                      ).then((_) => _fetchData());
+                    },
+                  ),
                 ],
               ),
             ],
           ),
-          const SizedBox(height: 20),
-          // ── Action buttons ────────────────────────────────────────────────
-          Row(
-            children: [
-              _ActionButton(
-                iconPath: 'assets/images/add_icon.png',
-                label: 'Add',
-                onTap: () {},
-              ),
-              const SizedBox(width: 15),
-              _ActionButton(
-                iconPath: 'assets/images/remove_icon.png',
-                label: 'Remove',
-                onTap: () {},
-              ),
-              const SizedBox(width: 15),
-              _ActionButton(
-                iconPath: 'assets/images/assets_icon.png',
-                label: 'Assets',
-                onTap: () {},
-              ),
-            ],
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
