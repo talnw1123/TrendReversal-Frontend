@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+// ignore: avoid_web_libraries_in_flutter
+import 'dart:html' as html;
+import '../../core/auth_service.dart';
+import 'otp_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -22,6 +26,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final FocusNode _confirmPasswordFocusNode = FocusNode();
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
+  bool _loading = false;
 
   @override
   void initState() {
@@ -56,6 +61,72 @@ class _RegisterScreenState extends State<RegisterScreen> {
     _passwordFocusNode.dispose();
     _confirmPasswordFocusNode.dispose();
     super.dispose();
+  }
+
+  Future<void> _handleRegister() async {
+    final firstName = _firstNameController.text.trim();
+    final lastName = _lastNameController.text.trim();
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+    final confirmPassword = _confirmPasswordController.text;
+
+    if (firstName.isEmpty || lastName.isEmpty || email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('กรุณากรอกข้อมูลให้ครบทุกช่อง')),
+      );
+      return;
+    }
+
+    if (password != confirmPassword) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('รหัสผ่านไม่ตรงกัน กรุณาตรวจสอบอีกครั้ง')),
+      );
+      return;
+    }
+
+    if (password.length < 8) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร')),
+      );
+      return;
+    }
+
+    setState(() => _loading = true);
+
+    final result = await AuthService().register(
+      firstName: firstName,
+      lastName: lastName,
+      email: email,
+      password: password,
+    );
+
+    if (mounted) setState(() => _loading = false);
+
+    if (result.pendingId != null) {
+      if (mounted) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => OtpScreen(
+              email: email,
+              pendingId: result.pendingId!,
+            ),
+          ),
+        );
+      }
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(result.errorMessage ?? 'การสมัครสมาชิกล้มเหลว')),
+        );
+      }
+    }
+  }
+
+  void _handleGoogleSignIn() {
+    // Save the current Flutter app URL so the backend can redirect back here after OAuth
+    html.window.localStorage['flutter_app_url'] = html.window.location.origin;
+    html.window.open(AuthService().googleAuthUrl, '_self');
   }
 
   @override
@@ -482,9 +553,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   width: double.infinity,
                   height: 49,
                   child: ElevatedButton(
-                    onPressed: () {
-                      // Handle registration
-                    },
+                    onPressed: _loading ? null : _handleRegister,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFFE0543D),
                       shape: RoundedRectangleBorder(
@@ -492,14 +561,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       elevation: 0,
                     ),
-                    child: Text(
-                      'Create Account',
-                      style: GoogleFonts.golosText(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        color: const Color(0xFF050505),
-                      ),
-                    ),
+                    child: _loading
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              color: Color(0xFF050505),
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : Text(
+                            'Create Account',
+                            style: GoogleFonts.golosText(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: const Color(0xFF050505),
+                            ),
+                          ),
                   ),
                 ),
                 const SizedBox(height: 33),
@@ -579,9 +657,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   child: Material(
                     color: Colors.transparent,
                     child: InkWell(
-                      onTap: () {
-                        // Handle Google sign up
-                      },
+                      onTap: _handleGoogleSignIn,
                       borderRadius: BorderRadius.circular(8),
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 15.0),

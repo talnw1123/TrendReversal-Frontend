@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../core/auth_service.dart';
 
 class OtpScreen extends StatefulWidget {
   final String email;
-  final VoidCallback? onVerifySuccess;
-  final VoidCallback? onResendOtp;
+  final String pendingId;
 
   const OtpScreen({
     super.key,
     required this.email,
-    this.onVerifySuccess,
-    this.onResendOtp,
+    required this.pendingId,
   });
 
   @override
@@ -28,10 +27,13 @@ class _OtpScreenState extends State<OtpScreen> {
     (index) => FocusNode(),
   );
   int _currentFocusIndex = 0;
+  bool _loading = false;
+  String? _currentPendingId;
 
   @override
   void initState() {
     super.initState();
+    _currentPendingId = widget.pendingId;
     // Add listeners to focus nodes to track current focus
     for (int i = 0; i < _focusNodes.length; i++) {
       _focusNodes[i].addListener(() {
@@ -65,8 +67,9 @@ class _OtpScreenState extends State<OtpScreen> {
       if (index < 5) {
         _focusNodes[index + 1].requestFocus();
       } else {
-        // Last field, remove focus
+        // Last field entered — auto submit
         _focusNodes[index].unfocus();
+        _handleContinue();
       }
     }
   }
@@ -82,23 +85,76 @@ class _OtpScreenState extends State<OtpScreen> {
     return _controllers.map((controller) => controller.text).join();
   }
 
-  void _handleContinue() {
-    String otp = _getOtpCode();
-    if (otp.length == 6) {
-      // Handle OTP verification
-      widget.onVerifySuccess?.call();
+  Future<void> _handleContinue() async {
+    final otp = _getOtpCode();
+    if (otp.length < 6) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('กรุณากรอกรหัส OTP ให้ครบ 6 หลัก')),
+      );
+      return;
+    }
+
+    if (_currentPendingId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('ไม่พบข้อมูลการลงทะเบียน กรุณาลองใหม่อีกครั้ง')),
+      );
+      return;
+    }
+
+    setState(() => _loading = true);
+
+    final result = await AuthService().verifyEmail(
+      pendingId: _currentPendingId!,
+      code: otp,
+    );
+
+    if (mounted) setState(() => _loading = false);
+
+    if (result.success) {
+      if (mounted) {
+        // Navigate to home and clear all previous routes
+        Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+      }
+    } else {
+      // Clear the entered code for retry
+      for (var controller in _controllers) {
+        controller.clear();
+      }
+      _focusNodes[0].requestFocus();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(result.errorMessage ?? 'รหัส OTP ไม่ถูกต้อง')),
+        );
+      }
     }
   }
 
-  void _handleResend() {
+  Future<void> _handleResend() async {
     // Clear all fields
     for (var controller in _controllers) {
       controller.clear();
     }
-    // Focus first field
     _focusNodes[0].requestFocus();
-    // Call resend callback
-    widget.onResendOtp?.call();
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('กำลังส่งรหัสใหม่...')),
+    );
+
+    final result = await AuthService().resendCode(widget.email);
+
+    if (mounted) {
+      if (result.pendingId != null) {
+        setState(() => _currentPendingId = result.pendingId);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('ส่งรหัส OTP ใหม่แล้ว กรุณาตรวจสอบอีเมล')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(result.errorMessage ?? 'ไม่สามารถส่งรหัสใหม่ได้')),
+        );
+      }
+    }
   }
 
   @override
@@ -157,14 +213,11 @@ class _OtpScreenState extends State<OtpScreen> {
               // OTP Input Boxes
               LayoutBuilder(
                 builder: (context, constraints) {
-                  // Calculate box size based on available width
-                  // Total gaps: 5 gaps × 10px = 50px
                   final totalGaps = 50.0;
                   final availableWidth = constraints.maxWidth;
                   final boxWidth = (availableWidth - totalGaps) / 6;
-                  // Maintain aspect ratio (approximately square, slightly wider than tall)
-                  final boxHeight = boxWidth * 0.91; // Original ratio: 51/56 ≈ 0.91
-                  
+                  final boxHeight = boxWidth * 0.91;
+
                   return Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: List.generate(
@@ -188,12 +241,12 @@ class _OtpScreenState extends State<OtpScreen> {
                 },
               ),
               const SizedBox(height: 34),
-              // Resend text (single line, centered)
+              // Resend text
               Center(
                 child: RichText(
                   textAlign: TextAlign.center,
                   text: TextSpan(
-                    text: 'Didn’t get the code? ',
+                    text: "Didn't get the code? ",
                     style: GoogleFonts.golosText(
                       fontSize: 15,
                       fontWeight: FontWeight.w300,
@@ -224,7 +277,7 @@ class _OtpScreenState extends State<OtpScreen> {
                 width: double.infinity,
                 height: 49,
                 child: ElevatedButton(
-                  onPressed: _handleContinue,
+                  onPressed: _loading ? null : _handleContinue,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFE0543D),
                     shape: RoundedRectangleBorder(
@@ -232,14 +285,23 @@ class _OtpScreenState extends State<OtpScreen> {
                     ),
                     elevation: 0,
                   ),
-                  child: Text(
-                    'Continue',
-                    style: GoogleFonts.golosText(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: const Color(0xFF050505),
-                    ),
-                  ),
+                  child: _loading
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            color: Color(0xFF050505),
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : Text(
+                          'Continue',
+                          style: GoogleFonts.golosText(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: const Color(0xFF050505),
+                          ),
+                        ),
                 ),
               ),
               const SizedBox(height: 9),
@@ -330,14 +392,12 @@ class _OtpInputBox extends StatelessWidget {
         ),
         onChanged: (value) {
           if (value.isEmpty) {
-            // Handle backspace
             onBackspace();
           } else {
             onChanged(value);
           }
         },
         onTap: () {
-          // Move cursor to end for better UX
           controller.selection = TextSelection.fromPosition(
             TextPosition(offset: controller.text.length),
           );

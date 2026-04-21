@@ -4,6 +4,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'register_screen.dart';
 import '../../core/auth_service.dart';
+// ignore: avoid_web_libraries_in_flutter
+import 'dart:html' as html;
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -396,7 +398,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     color: Colors.transparent,
                     child: InkWell(
                       onTap: () {
-                        // Handle Google sign in
+                        html.window.localStorage['flutter_app_url'] = html.window.location.origin;
+                        html.window.open(AuthService().googleAuthUrl, '_self');
                       },
                       borderRadius: BorderRadius.circular(8),
                       child: Padding(
