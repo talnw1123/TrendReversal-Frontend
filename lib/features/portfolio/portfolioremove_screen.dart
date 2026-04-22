@@ -4,10 +4,11 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'portfolio_controller.dart';
 import '../../core/currency_provider.dart';
+import '../../core/asset_helper.dart';
 
 // ─── Design Tokens ────────────────────────────────────────────────────────────
 const Color _kBg = Color(0xFF121212);
-const Color _kSectionBg = Color(0xFF000000);
+const Color _kSectionBg = Color(0xFF191919);
 const Color _kInputBg = Color(0xFF282828);
 const Color _kRed = Color(0xFFE4472B);
 const Color _kWhite = Color(0xFFFFFFFF);
@@ -69,41 +70,83 @@ class _PortfolioRemoveScreenState extends State<PortfolioRemoveScreen> {
     return Scaffold(
       backgroundColor: _kBg,
       body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            const SizedBox(height: 20),
-            Text(
-              'Portfolio',
-              style: GoogleFonts.inter(
-                fontSize: 24,
-                fontWeight: FontWeight.w400,
-                color: _kWhite,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Expanded(
-              child: Container(
-                color: _kSectionBg,
-                child: Column(
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const SizedBox(height: 22),
+              // Header: back button + title
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 40.0),
+                child: Row(
                   children: [
-                    const _EditPortfolioTab(),
+                    _BackButton(onTap: () => Navigator.pop(context)),
                     Expanded(
-                      child: ListenableBuilder(
+                      child: Center(
+                        child: Text(
+                          'Portfolio',
+                          style: GoogleFonts.golosText(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w400,
+                            color: _kWhite,
+                          ),
+                        ),
+                      ),
+                    ),
+                    // Balance spacer to keep title centred
+                    const SizedBox(width: 44),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 30),
+              // ── Section container ──────────────────────────────────────────
+              Padding(
+                padding: const EdgeInsets.fromLTRB(25, 0, 25, 20),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: _kSectionBg,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const _EditPortfolioTab(),
+                      ListenableBuilder(
                         listenable: CurrencyProvider(),
                         builder: (context, _) {
                           if (_loading) {
-                            return const Center(child: CircularProgressIndicator(color: _kRed));
+                            return const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 40),
+                              child: Center(
+                                child: CircularProgressIndicator(color: _kRed),
+                              ),
+                            );
                           }
                           if (_error != null) {
-                            return Center(child: Text(_error!, style: const TextStyle(color: Colors.white)));
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 20),
+                              child: Center(
+                                child: Text(
+                                  _error!,
+                                  style: const TextStyle(color: Colors.white),
+                                ),
+                              ),
+                            );
                           }
                           if (_items.isEmpty) {
-                            return const Center(
-                              child: Text('ยังไม่มีสินทรัพย์ในพอร์ต', style: TextStyle(color: _kGray)),
+                            return const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 40),
+                              child: Center(
+                                child: Text(
+                                  'ยังไม่มีสินทรัพย์ในพอร์ต',
+                                  style: TextStyle(color: _kGray),
+                                ),
+                              ),
                             );
                           }
                           return ListView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
                             padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
                             itemCount: _items.length,
                             itemBuilder: (context, index) {
@@ -119,12 +162,12 @@ class _PortfolioRemoveScreenState extends State<PortfolioRemoveScreen> {
                           );
                         },
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -136,16 +179,22 @@ class _PortfolioRemoveScreenState extends State<PortfolioRemoveScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: _kInputBg,
-        title: Text('ยืนยันหน้าลบ', style: GoogleFonts.inter(color: _kWhite)),
-        content: Text('คุณต้องการลบ $assetName ในพอร์ตหรือไม่?', style: GoogleFonts.inter(color: _kGray)),
+        title: Text('Confirm Deletion', style: GoogleFonts.inter(color: _kWhite)),
+        content: Text(
+          'Are you sure you want to remove $assetName from your portfolio?',
+          style: GoogleFonts.inter(color: _kGray),
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('ยกเลิก', style: TextStyle(color: _kGray))),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel', style: TextStyle(color: _kGray)),
+          ),
           TextButton(
             onPressed: () {
               Navigator.pop(ctx);
               _removeItem(item['id'].toString());
             },
-            child: const Text('ลบ', style: TextStyle(color: _kRed)),
+            child: const Text('Delete', style: TextStyle(color: _kRed)),
           ),
         ],
       ),
@@ -160,7 +209,8 @@ class _AssetTransactionCard extends StatelessWidget {
 
   const _AssetTransactionCard({required this.item, required this.onRemove});
 
-  double _toDouble(dynamic v) => (v is num) ? v.toDouble() : (double.tryParse(v.toString()) ?? 0.0);
+  double _toDouble(dynamic v) =>
+      (v is num) ? v.toDouble() : (double.tryParse(v.toString()) ?? 0.0);
 
   @override
   Widget build(BuildContext context) {
@@ -185,10 +235,41 @@ class _AssetTransactionCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Text(name, style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.bold, color: _kWhite)),
+                    ClipOval(
+                      child: Image.asset(
+                        AssetHelper.getAssetImagePath(symbol),
+                        width: 20,
+                        height: 20,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) => Container(
+                          width: 20,
+                          height: 20,
+                          color: const Color(0xFF282828),
+                          child: Center(
+                            child: Text(
+                              symbol.isNotEmpty ? symbol[0].toUpperCase() : '?',
+                              style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
                     const SizedBox(width: 8),
-                    Text('($symbol)', style: GoogleFonts.inter(fontSize: 12, color: _kGray)),
+                    Text(
+                      name,
+                      style: GoogleFonts.inter(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: _kWhite,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      '($symbol)',
+                      style: GoogleFonts.inter(fontSize: 12, color: _kGray),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 8),
@@ -204,9 +285,30 @@ class _AssetTransactionCard extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 16),
-          IconButton(
-            icon: const Icon(Icons.delete_outline, color: _kRed),
-            onPressed: onRemove,
+          Ink(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: _kRed.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: InkWell(
+              onTap: onRemove,
+              borderRadius: BorderRadius.circular(8),
+              hoverColor: _kRed.withValues(alpha: 0.25),
+              splashColor: _kRed.withValues(alpha: 0.35),
+              child: Center(
+                child: SvgPicture.asset(
+                  'assets/icons/remove.svg',
+                  width: 22,
+                  height: 22,
+                  colorFilter: const ColorFilter.mode(
+                    _kRed,
+                    BlendMode.srcIn,
+                  ),
+                ),
+              ),
+            ),
           ),
         ],
       ),
@@ -250,6 +352,37 @@ class _EditPortfolioTab extends StatelessWidget {
         const SizedBox(height: 10),
         Container(height: 1.5, color: _kRed),
       ],
+    );
+  }
+}
+// ─── Back Button ─────────────────────────────────────────────────────────────
+
+class _BackButton extends StatelessWidget {
+  final VoidCallback onTap;
+  const _BackButton({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Ink(
+      width: 44,
+      height: 44,
+      decoration: BoxDecoration(
+        color: const Color(0xFF1E1E1E),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        hoverColor: Colors.white.withOpacity(0.1),
+        splashColor: Colors.white.withOpacity(0.05),
+        child: Center(
+          child: Image.asset(
+            'assets/icons/back_icon.png',
+            width: 20,
+            height: 20,
+          ),
+        ),
+      ),
     );
   }
 }

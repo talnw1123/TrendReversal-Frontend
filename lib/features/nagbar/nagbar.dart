@@ -1,12 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-
-// ─── Design Tokens ────────────────────────────────────────────────────────────
-const Color _kNavBg = Color(0xFF282828);
-const Color _kNavActive = Color(0xFFFFFFFF);
-const Color _kNavInactive = Color(0x80FFFFFF); // 50% white
-const Color _kCenterTop = Color(0xFFFF5733); // gradient top (lighter orange)
-const Color _kCenterBottom = Color(0xFFBF1800); // gradient bottom (darker red)
+import 'package:flutter_svg/flutter_svg.dart';
+import 'dart:ui';
 
 // ─── Nav Item Data ────────────────────────────────────────────────────────────
 class _NavItemData {
@@ -16,10 +11,10 @@ class _NavItemData {
 }
 
 const List<_NavItemData> _kNavItems = [
-  _NavItemData(iconAsset: 'assets/icons/nav_home.png', label: 'Home'),
-  _NavItemData(iconAsset: 'assets/icons/nav_ai.png', label: 'Ai'),
-  _NavItemData(iconAsset: 'assets/icons/nav_portfolio.png', label: 'Portfolio'),
-  _NavItemData(iconAsset: 'assets/icons/nav_setting.png', label: 'Setting'),
+  _NavItemData(iconAsset: 'assets/icons/nav_home.svg', label: 'Home'),
+  _NavItemData(iconAsset: 'assets/icons/nav_ai.svg', label: 'Ai'),
+  _NavItemData(iconAsset: 'assets/icons/nav_portfolio.svg', label: 'Portfolio'),
+  _NavItemData(iconAsset: 'assets/icons/nav_setting.svg', label: 'Setting'),
 ];
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -44,83 +39,93 @@ class AppNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 80,
-      child: Stack(
-        clipBehavior: Clip.none,
-        alignment: Alignment.topCenter,
-        children: [
-          // ── Bar background + 4 tabs ─────────────────────────────────────
-          Positioned.fill(
-            child: Container(
-              color: _kNavBg,
-              child: Row(
-                children: [
-                  // Left pair
-                  _NavTab(
-                    data: _kNavItems[0],
-                    isActive: selectedIndex == 0,
-                    onTap: () => onTabSelected(0),
-                  ),
-                  _NavTab(
-                    data: _kNavItems[1],
-                    isActive: selectedIndex == 1,
-                    onTap: () => onTabSelected(1),
-                  ),
-                  // Center spacer (equal flex to each tab, reserved for button)
-                  const Expanded(child: SizedBox()),
-                  // Right pair
-                  _NavTab(
-                    data: _kNavItems[2],
-                    isActive: selectedIndex == 2,
-                    onTap: () => onTabSelected(2),
-                  ),
-                  _NavTab(
-                    data: _kNavItems[3],
-                    isActive: selectedIndex == 3,
-                    onTap: () => onTabSelected(3),
-                  ),
-                ],
+    return Container(
+      height: 90,
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(100),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            decoration: BoxDecoration(
+              color: const Color(0xFF1E1E1E).withValues(alpha: 0.7),
+              borderRadius: BorderRadius.circular(100),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.1),
+                width: 0.5,
               ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.4),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
+                ),
+              ],
             ),
-          ),
-
-          // ── Floating center button ──────────────────────────────────────
-          Positioned(
-            top: -18,
-            child: Tooltip(
-              message: 'Exchange',
-              child: GestureDetector(
-                onTap: onCenterTap,
-                child: Container(
-                  width: 54,
-                  height: 54,
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: RadialGradient(
-                      center: Alignment(-0.3, -0.4),
-                      radius: 0.85,
-                      colors: [_kCenterTop, _kCenterBottom],
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Color(0x55BF1800),
-                        blurRadius: 12,
-                        offset: Offset(0, 4),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _NavTab(
+                  iconAsset: _kNavItems[0].iconAsset,
+                  label: 'Home',
+                  isActive: selectedIndex == 0,
+                  onTap: () => onTabSelected(0),
+                ),
+                _NavTab(
+                  iconAsset: _kNavItems[1].iconAsset,
+                  label: 'Chat',
+                  isActive: selectedIndex == 1,
+                  onTap: () => onTabSelected(1),
+                ),
+                // Center Trend Button (Market Screen - Index 2)
+                GestureDetector(
+                  onTap: onCenterTap,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 250),
+                    padding: EdgeInsets.all(selectedIndex == 2 ? 14 : 12),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      boxShadow: selectedIndex == 2
+                          ? [
+                              BoxShadow(
+                                color: const Color(0xFFEC6244).withValues(alpha: 0.4),
+                                blurRadius: 15,
+                                spreadRadius: 2,
+                              )
+                            ]
+                          : [],
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFFEC6244), Color(0xFFDB2110)],
                       ),
-                    ],
-                  ),
-                  child: const Icon(
-                    Icons.swap_horiz_rounded,
-                    color: Colors.white,
-                    size: 30,
-                    semanticLabel: 'Exchange',
+                    ),
+                    child: SvgPicture.asset(
+                      'assets/icons/nav_trend.svg',
+                      width: 15,
+                      height: 15,
+                      colorFilter: const ColorFilter.mode(
+                        Colors.white,
+                        BlendMode.srcIn,
+                      ),
+                    ),
                   ),
                 ),
-              ),
+                _NavTab(
+                  iconAsset: _kNavItems[2].iconAsset,
+                  label: 'Portfolio',
+                  isActive: selectedIndex == 3,
+                  onTap: () => onTabSelected(3),
+                ),
+                _NavTab(
+                  iconAsset: _kNavItems[3].iconAsset,
+                  label: 'Setting',
+                  isActive: selectedIndex == 4,
+                  onTap: () => onTabSelected(4),
+                ),
+              ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }
@@ -130,49 +135,57 @@ class AppNavBar extends StatelessWidget {
 // _NavTab
 // ═══════════════════════════════════════════════════════════════════════════════
 class _NavTab extends StatelessWidget {
-  final _NavItemData data;
+  final String iconAsset;
+  final String label;
   final bool isActive;
   final VoidCallback onTap;
 
   const _NavTab({
-    super.key,
-    required this.data,
+    required this.iconAsset,
+    required this.label,
     required this.isActive,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    final color = isActive ? _kNavActive : _kNavInactive;
-
-    return Expanded(
-      child: Semantics(
-        label: data.label,
-        selected: isActive,
-        button: true,
-        child: GestureDetector(
-          onTap: onTap,
-          behavior: HitTestBehavior.opaque,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Image.asset(
-                data.iconAsset,
-                width: 25,
-                height: 25,
-                color: color,
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+        padding: EdgeInsets.symmetric(
+          horizontal: isActive ? 16 : 10,
+          vertical: 8,
+        ),
+        decoration: BoxDecoration(
+          color: isActive ? Colors.white : Colors.transparent,
+          borderRadius: BorderRadius.circular(100),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SvgPicture.asset(
+              iconAsset,
+              width: 20,
+              height: 20,
+              colorFilter: ColorFilter.mode(
+                isActive ? const Color(0xFFDB2110) : Colors.white60,
+                BlendMode.srcIn,
               ),
-              const SizedBox(height: 6),
+            ),
+            if (isActive) ...[
+              const SizedBox(width: 8),
               Text(
-                data.label,
+                label,
                 style: GoogleFonts.inter(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w400,
-                  color: color,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF1E1E1E),
                 ),
               ),
             ],
-          ),
+          ],
         ),
       ),
     );

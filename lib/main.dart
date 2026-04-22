@@ -35,7 +35,9 @@ class MyApp extends StatelessWidget {
     }
 
     // Otherwise use saved session to decide starting screen
-    return AuthService().token != null ? const AppShell() : const LoginScreen();
+    return AuthService().token != null
+        ? AppShell(key: AppShell.appShellKey)
+        : const LoginScreen();
   }
 
   @override
@@ -50,7 +52,7 @@ class MyApp extends StatelessWidget {
       ),
       home: _determineHome(),
       routes: {
-        '/home': (context) => const AppShell(),
+        '/home': (context) => AppShell(key: AppShell.appShellKey),
         '/login': (context) => const LoginScreen(),
         '/auth/success': (context) => const AuthSuccessScreen(),
       },

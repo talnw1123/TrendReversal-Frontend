@@ -72,21 +72,48 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     if (firstName.isEmpty || lastName.isEmpty || email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('กรุณากรอกข้อมูลให้ครบทุกช่อง')),
+        SnackBar(
+          content: const Text('กรุณากรอกข้อมูลให้ครบทุกช่อง'),
+          backgroundColor: const Color(0xFFE0543D),
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 2),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+          margin: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
+        ),
       );
       return;
     }
 
     if (password != confirmPassword) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('รหัสผ่านไม่ตรงกัน กรุณาตรวจสอบอีกครั้ง')),
+        SnackBar(
+          content: const Text('รหัสผ่านไม่ตรงกัน กรุณาตรวจสอบอีกครั้ง'),
+          backgroundColor: const Color(0xFFE0543D),
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 2),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+          margin: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
+        ),
       );
       return;
     }
 
     if (password.length < 8) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร')),
+        SnackBar(
+          content: const Text('รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร'),
+          backgroundColor: const Color(0xFFE0543D),
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 2),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+          margin: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
+        ),
       );
       return;
     }
@@ -117,7 +144,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
     } else {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(result.errorMessage ?? 'การสมัครสมาชิกล้มเหลว')),
+          SnackBar(
+            content: Text(result.errorMessage ?? 'การสมัครสมาชิกล้มเหลว'),
+            backgroundColor: const Color(0xFFE0543D),
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 2),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            margin: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
+          ),
         );
       }
     }
@@ -142,17 +178,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
               children: [
                 const SizedBox(height: 22),
                 // Back button
-                GestureDetector(
-                  onTap: () {
-                    Navigator.pop(context);
-                  },
-                  child: Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF1E1E1E),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
+                Ink(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1E1E1E),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: InkWell(
+                    onTap: () {
+                      Navigator.pop(context);
+                    },
+                    borderRadius: BorderRadius.circular(8),
+                    hoverColor: Colors.white.withValues(alpha: 0.1),
+                    splashColor: Colors.white.withValues(alpha: 0.05),
                     child: Center(
                       child: Image.asset(
                         'assets/icons/back_icon.png',
@@ -446,6 +485,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     'assets/icons/eye_icon.svg',
                                     width: 13,
                                     height: 8,
+                                    colorFilter: ColorFilter.mode(
+                                      _obscurePassword ? Colors.white : Colors.black,
+                                      BlendMode.srcIn,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -537,6 +580,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     'assets/icons/eye_icon.svg',
                                     width: 13,
                                     height: 8,
+                                    colorFilter: ColorFilter.mode(
+                                      _obscureConfirmPassword ? Colors.white : Colors.black,
+                                      BlendMode.srcIn,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -636,52 +683,40 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
                 const SizedBox(height: 22),
                 // Sign up with Google button
-                Container(
+                SizedBox(
                   width: double.infinity,
                   height: 49,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF191919),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: const Color(0xFF595959),
-                      width: 0.5,
-                    ),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Color.fromRGBO(0, 0, 0, 0.50),
-                        blurRadius: 6,
-                        offset: Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      onTap: _handleGoogleSignIn,
-                      borderRadius: BorderRadius.circular(8),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 15.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              'Sign up with Google',
-                              style: GoogleFonts.golosText(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w400,
-                                color: const Color(0xFFFFFFFF),
-                                height: 1.125,
-                              ),
-                            ),
-                            const SizedBox(width: 15),
-                            SvgPicture.asset(
-                              'assets/icons/google_logo.svg',
-                              width: 24,
-                              height: 25,
-                            ),
-                          ],
+                  child: ElevatedButton(
+                    onPressed: _handleGoogleSignIn,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF191919),
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        side: const BorderSide(
+                          color: Color(0xFF595959),
+                          width: 0.5,
                         ),
                       ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Sign up with Google',
+                          style: GoogleFonts.golosText(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                        const SizedBox(width: 15),
+                        SvgPicture.asset(
+                          'assets/icons/google_logo.svg',
+                          width: 24,
+                          height: 25,
+                        ),
+                      ],
                     ),
                   ),
                 ),

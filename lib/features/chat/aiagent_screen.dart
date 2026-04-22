@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'chat_screen.dart';
 import 'historychat_screen.dart';
@@ -83,14 +84,25 @@ class _AiAgentScreenState extends State<AiAgentScreen> {
                   children: [
                     const Spacer(),
                     // Hero text
-                    Text(
-                      'Talk with Quantix',
-                      style: GoogleFonts.inter(
-                        fontSize: 32,
-                        fontWeight: FontWeight.w400,
-                        color: _textPrimary,
-                      ),
-                      textAlign: TextAlign.center,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Talk with InsightGPT',
+                          style: GoogleFonts.inter(
+                            fontSize: 32,
+                            fontWeight: FontWeight.w400,
+                            color: _textPrimary,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(width: 12),
+                        SvgPicture.asset(
+                          'assets/images/logoai.svg',
+                          width: 32,
+                          height: 32,
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 8),
                     Text(
@@ -162,26 +174,34 @@ class _AppHeader extends StatelessWidget {
               fit: BoxFit.cover,
             ),
           ),
-          const Expanded(
+          Expanded(
             child: Center(
               child: Text(
-                'Quantix',
-                style: TextStyle(
-                  fontFamily: 'Inter',
-                  fontSize: 24,
+                'InsightGPT',
+                style: GoogleFonts.golosText(
+                  fontSize: 18,
                   fontWeight: FontWeight.w400,
                   color: _textPrimary,
                 ),
               ),
             ),
           ),
-          GestureDetector(
-            onTap: onHistoryTap,
-            child: Image.asset(
-              'assets/icons/history_icon.png',
-              width: 25,
-              height: 25,
-              color: Colors.white,
+          SizedBox(
+            width: 40,
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: GestureDetector(
+                onTap: onHistoryTap,
+                child: SvgPicture.asset(
+                  'assets/icons/history.svg',
+                  width: 25,
+                  height: 25,
+                  colorFilter: const ColorFilter.mode(
+                    Colors.white,
+                    BlendMode.srcIn,
+                  ),
+                ),
+              ),
             ),
           ),
         ],
@@ -225,7 +245,18 @@ class _ChatInputField extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
-          Image.asset('assets/icons/microphone_icon.png', width: 20, height: 20, color: Colors.white.withOpacity(0.7)),
+          GestureDetector(
+            onTap: () {
+              if (controller.text.trim().isNotEmpty) {
+                onSubmitted(controller.text);
+              }
+            },
+            child: Icon(
+              Icons.send_rounded,
+              size: 20,
+              color: Colors.white.withOpacity(0.7),
+            ),
+          ),
         ],
       ),
     );
@@ -248,18 +279,14 @@ class _PromptGuidanceSheet extends StatelessWidget {
           const SizedBox(height: 20),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                Column(
-                  children: [
-                    Text('Suggested Questions', style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w400, color: _textPrimary)),
-                    const SizedBox(height: 6),
-                    Text('Choose a question to ask Quantix', style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w400, color: Colors.white.withOpacity(0.5))),
-                  ],
-                ),
-                Positioned(right: 0, top: 0, child: GestureDetector(onTap: () => Navigator.pop(context), child: Image.asset('assets/icons/close_icon.png', width: 20, height: 20, color: Colors.white))),
-              ],
+            child: Center(
+              child: Column(
+                children: [
+                  Text('Suggested Questions', style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w400, color: _textPrimary)),
+                  const SizedBox(height: 6),
+                  Text('Choose a question to ask InsightGPT', style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w400, color: Colors.white.withOpacity(0.5))),
+                ],
+              ),
             ),
           ),
           const SizedBox(height: 24),

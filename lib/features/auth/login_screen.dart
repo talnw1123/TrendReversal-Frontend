@@ -44,7 +44,16 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (email.isEmpty || pass.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('กรุณากรอก Email และ Password')),
+        SnackBar(
+          content: const Text('กรุณากรอก Email และ Password'),
+          backgroundColor: const Color(0xFFE0543D),
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 2),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+          margin: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
+        ),
       );
       return;
     }
@@ -58,7 +67,16 @@ class _LoginScreenState extends State<LoginScreen> {
     } else {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('เข้าสู่ระบบไม่สำเร็จ กรุณาตรวจสอบข้อมูล')),
+          SnackBar(
+            content: const Text('เข้าสู่ระบบไม่สำเร็จ กรุณาตรวจสอบข้อมูล'),
+            backgroundColor: const Color(0xFFE0543D),
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 2),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            margin: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
+          ),
         );
       }
     }
@@ -85,9 +103,15 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 22),
-                // Status bar
-                const SizedBox(height: 144),
+                const SizedBox(height: 60),
+                Center(
+                  child: SvgPicture.asset(
+                    'assets/images/logo.svg',
+                    height: 120,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+                const SizedBox(height: 40),
                 // Email Address Field
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -232,6 +256,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                     'assets/icons/eye_icon.svg',
                                     width: 13,
                                     height: 8,
+                                    colorFilter: ColorFilter.mode(
+                                      _obscurePassword ? Colors.white : Colors.black,
+                                      BlendMode.srcIn,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -257,12 +285,14 @@ class _LoginScreenState extends State<LoginScreen> {
                         height: 16,
                         decoration: BoxDecoration(
                           border: Border.all(
-                            color: const Color(0xFF595959),
+                            color: _rememberDevice
+                                ? const Color(0xFFE0543D)
+                                : const Color(0xFF595959),
                             width: 1,
                           ),
                           borderRadius: BorderRadius.circular(2),
                           color: _rememberDevice
-                              ? const Color(0xFF595959)
+                              ? const Color(0xFFE0543D)
                               : Colors.transparent,
                         ),
                         child: _rememberDevice
@@ -376,55 +406,43 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 22),
                 // Sign up with Google button
-                Container(
+                SizedBox(
                   width: double.infinity,
                   height: 49,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF191919),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: const Color(0xFF595959),
-                      width: 0.5,
-                    ),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Color.fromRGBO(0, 0, 0, 0.50),
-                        blurRadius: 6,
-                        offset: Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      onTap: () {
-                        html.window.localStorage['flutter_app_url'] = html.window.location.origin;
-                        html.window.open(AuthService().googleAuthUrl, '_self');
-                      },
-                      borderRadius: BorderRadius.circular(8),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 15.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              'Sign up with Google',
-                              style: GoogleFonts.golosText(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w400,
-                                color: const Color(0xFFFFFFFF),
-                                height: 1.125,
-                              ),
-                            ),
-                            const SizedBox(width: 15),
-                            SvgPicture.asset(
-                              'assets/icons/google_logo.svg',
-                              width: 24,
-                              height: 25,
-                            ),
-                          ],
+                  child: ElevatedButton(
+                    onPressed: () {
+                      html.window.localStorage['flutter_app_url'] = html.window.location.origin;
+                      html.window.open(AuthService().googleAuthUrl, '_self');
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF191919),
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        side: const BorderSide(
+                          color: Color(0xFF595959),
+                          width: 0.5,
                         ),
                       ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Sign up with Google',
+                          style: GoogleFonts.golosText(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                        const SizedBox(width: 15),
+                        SvgPicture.asset(
+                          'assets/icons/google_logo.svg',
+                          width: 24,
+                          height: 25,
+                        ),
+                      ],
                     ),
                   ),
                 ),

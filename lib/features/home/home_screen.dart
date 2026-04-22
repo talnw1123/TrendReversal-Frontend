@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'dart:math' as math;
 import '../../core/currency_provider.dart';
-import '../../shared/widgets/currency_toggle.dart';
 import '../portfolio/portfolio_controller.dart';
 import '../portfolio/portfolioadd_screen.dart';
 import '../portfolio/portfolioremove_screen.dart';
 import '../portfolio/portfolio_screen.dart';
+import '../nagbar/app_shell.dart';
 
 // ─── Design Tokens ────────────────────────────────────────────────────────────
 const Color _kBg = Color(0xFF121212);
@@ -129,10 +130,10 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(height: 14),
               // ── App Bar ───────────────────────────────────────────────────
               const _HomeAppBar(),
-              const SizedBox(height: 22),
+              const SizedBox(height: 15),
               // ── Crypto Cards ──────────────────────────────────────────────
               const _CryptoCardsList(),
-              const SizedBox(height: 28),
+              const SizedBox(height: 4),
               // ── Transactions ──────────────────────────────────────────────
               const _SectionDivider(label: 'Transactions'),
               const SizedBox(height: 4),
@@ -186,16 +187,12 @@ class _HomeAppBar extends StatelessWidget {
         children: [
           Row(
             children: [
-              Text(
-                'Quantix',
-                style: GoogleFonts.inter(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w400,
-                  color: _kWhite,
-                ),
+              SvgPicture.asset(
+                'assets/images/logo.svg',
+                height: 40,
+                fit: BoxFit.contain,
               ),
               const SizedBox(width: 12),
-              const CurrencyToggle(),
             ],
           ),
           // Bell icon with red notification dot
@@ -247,11 +244,12 @@ class _CryptoCardsList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 172,
+      height: 240, // เพิ่มพื้นที่ให้เงาด้านบน/ล่าง
       child: ListView.separated(
+        clipBehavior: Clip.none, // ห้ามตัดเงาที่ล้นออกมา
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
-        padding: const EdgeInsets.only(left: 24, right: 24),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
         itemCount: _kCryptoList.length,
         separatorBuilder: (_, __) => const SizedBox(width: 16),
         itemBuilder: (context, index) => _CryptoCard(data: _kCryptoList[index]),
@@ -271,111 +269,123 @@ class _CryptoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     // Card is ~60% of screen width, matching the BTC card proportion
-    final cardWidth = (screenWidth - 48) * 0.63;
+    final cardWidth = (screenWidth - 38) * 0.63;
 
-    return SizedBox(
-      width: cardWidth,
-      height: 172,
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          // ── Card body ─────────────────────────────────────────────────────
-          Positioned(
-            top: 22,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: Container(
-              decoration: BoxDecoration(
-                color: _kCard,
-                borderRadius: BorderRadius.circular(10),
+    return TweenAnimationBuilder<double>(
+      tween: Tween<double>(begin: 0, end: 1),
+      duration: const Duration(milliseconds: 1800),
+      builder: (context, value, child) {
+        // Create a pulsing effect using sine wave
+        final pulse = (math.sin(DateTime.now().millisecondsSinceEpoch / 1000 * math.pi) + 1) / 2;
+        
+        return Container(
+          width: cardWidth,
+          height: 180, // กลับมาใช้ความสูงเดิม
+          decoration: BoxDecoration(
+            color: _kCard,
+            borderRadius: BorderRadius.circular(10),
+            boxShadow: [
+              BoxShadow(
+                color: _kGray.withOpacity(0.08 + (pulse * 0.12)), // เรืองแสงสีแดง
+                blurRadius: 10 + (pulse * 5),
+                spreadRadius: 1 + (pulse * 1),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Name + price row (left-padded to make room for icon)
-                  Padding(
-                    padding: const EdgeInsets.only(left: 60, right: 10, top: 12),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                data.name,
-                                style: GoogleFonts.inter(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                  color: _kWhite,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              ListenableBuilder(
-                                listenable: CurrencyProvider(),
-                                builder: (context, _) {
-                                  // Strip commas and " Bath" to get numeric value
-                                  final cleanPrice = data.price.replaceAll(',', '').replaceAll(' Bath', '');
-                                  final val = double.tryParse(cleanPrice) ?? 0;
-                                  return Text(
-                                    CurrencyProvider().formatValue(val),
-                                    style: GoogleFonts.inter(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w400,
-                                      color: _kWhite,
-                                    ),
-                                  );
-                                },
-                              ),
-                            ],
-                          ),
-                        ),
-                        // Navigate icon
-                        Container(
-                          width: 24,
-                          height: 24,
-                          decoration: BoxDecoration(
-                            color: _kDarkCard,
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Icon(
-                            Icons.north_east_rounded,
-                            size: 12,
-                            color: _kWhite.withValues(alpha: 0.8),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const Spacer(),
-                  // Chart SVG
-                  ClipRRect(
-                    borderRadius: const BorderRadius.only(
-                      bottomLeft: Radius.circular(10),
-                      bottomRight: Radius.circular(10),
-                    ),
-                    child: SvgPicture.asset(
-                      data.chartAsset,
-                      width: double.infinity,
-                      height: 47,
-                      fit: BoxFit.fill,
-                    ),
-                  ),
-                ],
-              ),
+            ],
+            border: Border.all(
+              color: _kGray.withOpacity(0.15 + (pulse * 0.25)), // ขอบสีแดง
+              width: 1.2,
             ),
           ),
-          // ── Coin icon (overlaps top-left of card) ─────────────────────────
-          Positioned(
-            top: 0,
-            left: 8,
-            child: ClipOval(
-              child: Image.asset(
-                data.iconPath,
-                width: 48,
-                height: 48,
-                fit: BoxFit.cover,
+          child: child,
+        );
+      },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Name + price row
+          Padding(
+            padding: const EdgeInsets.only(left: 12, right: 10, top: 12),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Coin icon
+                ClipOval(
+                  child: Image.asset(
+                    data.iconPath,
+                    width: 44,
+                    height: 44,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        data.name,
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: _kWhite,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      ListenableBuilder(
+                        listenable: CurrencyProvider(),
+                        builder: (context, _) {
+                          // Strip commas and " Bath" to get numeric value
+                          final cleanPrice = data.price
+                              .replaceAll(',', '')
+                              .replaceAll(' Bath', '');
+                          final val = double.tryParse(cleanPrice) ?? 0;
+                          return Text(
+                            CurrencyProvider().formatValue(val),
+                            style: GoogleFonts.inter(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w400,
+                              color: _kWhite,
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                // Navigate icon
+                Container(
+                  width: 24,
+                  height: 24,
+                  decoration: BoxDecoration(
+                    color: _kDarkCard,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Icon(
+                    Icons.north_east_rounded,
+                    size: 12,
+                    color: _kWhite.withValues(alpha: 0.8),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Spacer(),
+          // ── Real-time Chart Placeholder ───────────────────────────────────
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: Container(
+              width: double.infinity,
+              height: 80,
+              decoration: BoxDecoration(
+                color: const Color(0xFF1E1E1E), // Slightly lighter than _kCard
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Center(
+                child: Text(
+                  'Real-time Chart Placeholder',
+                  style: GoogleFonts.inter(fontSize: 10, color: Colors.white24),
+                ),
               ),
             ),
           ),
@@ -552,16 +562,15 @@ class _PortfolioCardState extends State<_PortfolioCard> {
           color: _kCard,
           borderRadius: BorderRadius.circular(20),
         ),
-        child: const Center(
-          child: CircularProgressIndicator(color: _kRed),
-        ),
+        child: const Center(child: CircularProgressIndicator(color: _kRed)),
       );
     }
 
     final totalCost = (_summary?['totalCost'] as num?)?.toDouble() ?? 0.0;
     final currentValue = (_summary?['currentValue'] as num?)?.toDouble() ?? 0.0;
     final totalProfit = (_summary?['totalProfit'] as num?)?.toDouble() ?? 0.0;
-    final profitPercent = (_summary?['totalProfitPercent'] as num?)?.toDouble() ?? 0.0;
+    final profitPercent =
+        (_summary?['totalProfitPercent'] as num?)?.toDouble() ?? 0.0;
 
     return ListenableBuilder(
       listenable: CurrencyProvider(),
@@ -590,21 +599,8 @@ class _PortfolioCardState extends State<_PortfolioCard> {
                       color: _kWhite80,
                     ),
                   ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: _kDarkCard,
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Text(
-                      currency == 'THB' ? 'Bath' : 'USD',
-                      style: GoogleFonts.inter(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w500,
-                        color: _kWhite,
-                      ),
-                    ),
-                  ),
+                  const SizedBox.shrink(), // ลบ Badge ออก
+
                 ],
               ),
               const SizedBox(height: 8),
@@ -613,9 +609,9 @@ class _PortfolioCardState extends State<_PortfolioCard> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Text(
-                    CurrencyProvider().formatValue(currentValue, includeSymbol: false),
+                    CurrencyProvider().formatValue(currentValue),
                     style: GoogleFonts.inter(
-                      fontSize: 20,
+                      fontSize: 26,
                       fontWeight: FontWeight.w600,
                       color: _kWhite,
                     ),
@@ -623,12 +619,6 @@ class _PortfolioCardState extends State<_PortfolioCard> {
                   const SizedBox(width: 12),
                   Row(
                     children: [
-                      Image.asset(
-                        'assets/images/right_arrow.png',
-                        width: 10,
-                        height: 10,
-                        color: isPositive ? _kGreen : _kRed,
-                      ),
                       const SizedBox(width: 2),
                       Text(
                         '${isPositive ? '+' : ''}${profitPercent.toStringAsFixed(2)}%',
@@ -670,31 +660,29 @@ class _PortfolioCardState extends State<_PortfolioCard> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    CurrencyProvider().formatValue(totalCost, includeSymbol: false),
+                    CurrencyProvider().formatValue(totalCost),
                     style: GoogleFonts.inter(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
                       color: _kWhite,
                     ),
                   ),
-                  Row(
+                   Row(
                     children: [
-                      SvgPicture.asset(
-                        'assets/icons/uptrend_arrow.svg',
-                        width: 9,
-                        height: 5,
-                        colorFilter: ColorFilter.mode(
-                          isPositive ? _kGreen : _kRed,
-                          BlendMode.srcIn,
-                        ),
+                      Transform.rotate(
+                        angle: isPositive ? 0 : math.pi,
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        '${isPositive ? '+' : ''}${CurrencyProvider().formatValue(totalProfit, includeSymbol: false)}',
+                        CurrencyProvider().formatValue(
+                          totalProfit,
+                          signed: true,
+                          includeSymbol: true,
+                        ),
                         style: GoogleFonts.inter(
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
-                          color: _kWhite,
+                          color: isPositive ? _kGreen : _kRed,
                         ),
                       ),
                     ],
@@ -706,35 +694,36 @@ class _PortfolioCardState extends State<_PortfolioCard> {
               Row(
                 children: [
                   _ActionButton(
-                    iconPath: 'assets/images/add_icon.png',
+                    iconPath: 'assets/icons/add.svg',
                     label: 'Add',
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const PortfolioAddScreen()),
+                        MaterialPageRoute(
+                          builder: (context) => const PortfolioAddScreen(),
+                        ),
                       ).then((_) => _fetchData());
                     },
                   ),
                   const SizedBox(width: 15),
                   _ActionButton(
-                    iconPath: 'assets/images/remove_icon.png',
+                    iconPath: 'assets/icons/remove.svg',
                     label: 'Remove',
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const PortfolioRemoveScreen()),
+                        MaterialPageRoute(
+                          builder: (context) => const PortfolioRemoveScreen(),
+                        ),
                       ).then((_) => _fetchData());
                     },
                   ),
                   const SizedBox(width: 15),
                   _ActionButton(
-                    iconPath: 'assets/images/assets_icon.png',
+                    iconPath: 'assets/icons/assets.svg',
                     label: 'Assets',
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const PortfolioScreen()),
-                      ).then((_) => _fetchData());
+                      AppShell.appShellKey.currentState?.setSelectedIndex(2);
                     },
                   ),
                 ],
@@ -775,11 +764,11 @@ class _ActionButton extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Image.asset(
+              SvgPicture.asset(
                 iconPath,
                 width: 25,
                 height: 25,
-                color: _kWhite,
+                colorFilter: const ColorFilter.mode(_kWhite, BlendMode.srcIn),
               ),
               const SizedBox(height: 6),
               Text(

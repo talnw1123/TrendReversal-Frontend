@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
+import '../../core/asset_helper.dart';
 import 'portfolio_controller.dart';
 
 // ─── Design Tokens ────────────────────────────────────────────────────────────
 const Color _kBg = Color(0xFF121212);
-const Color _kSectionBg = Color(0xFF000000);
+const Color _kSectionBg = Color(0xFF191919);
 const Color _kInputBg = Color(0xFF282828);
 const Color _kGreen = Color(0xFF47D5A6);
 const Color _kWhite = Color(0xFFFFFFFF);
@@ -14,11 +16,11 @@ const Color _kDark = Color(0xFF050505);
 
 // ─── Market Options (mapped to backend AssetId) ───────────────────────────────
 const List<Map<String, String>> _kMarkets = [
-  {'label': 'Bitcoin (BTC)',  'id': 'BTC'},
-  {'label': 'Gold',           'id': 'Gold'},
-  {'label': 'SET 50',         'id': 'Thai'},
-  {'label': 'S&P 500 (US)',   'id': 'US'},
-  {'label': 'FTSE 100 (UK)',  'id': 'UK'},
+  {'label': 'Bitcoin (BTC)', 'id': 'BTC'},
+  {'label': 'Gold', 'id': 'Gold'},
+  {'label': 'SET 50', 'id': 'Thai'},
+  {'label': 'S&P 500 (US)', 'id': 'US'},
+  {'label': 'FTSE 100 (UK)', 'id': 'UK'},
 ];
 
 // ─── Screen ───────────────────────────────────────────────────────────────────
@@ -33,7 +35,7 @@ class _PortfolioAddScreenState extends State<PortfolioAddScreen> {
   final _ctrl = PortfolioController();
   Map<String, String> _selectedMarket = _kMarkets.first;
   DateTime _selectedDate = DateTime.now();
-  final TextEditingController _priceCtrl    = TextEditingController();
+  final TextEditingController _priceCtrl = TextEditingController();
   final TextEditingController _quantityCtrl = TextEditingController();
   bool _submitting = false;
   String _selectedCurrency = 'THB';
@@ -51,8 +53,8 @@ class _PortfolioAddScreenState extends State<PortfolioAddScreen> {
         '${_selectedDate.year}';
   }
 
-  String get _ticker    => _selectedMarket['id'] ?? '';
-  String get _coinName  => _selectedMarket['label']?.split(' (').first ?? '';
+  String get _ticker => _selectedMarket['id'] ?? '';
+  String get _coinName => _selectedMarket['label']?.split(' (').first ?? '';
 
   Future<void> _pickDate() async {
     final picked = await showDatePicker(
@@ -85,146 +87,217 @@ class _PortfolioAddScreenState extends State<PortfolioAddScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const SizedBox(height: 20),
-            // ── Title ──────────────────────────────────────────────────────
-            Text(
-              'Portfolio',
-              style: GoogleFonts.inter(
-                fontSize: 24,
-                fontWeight: FontWeight.w400,
-                color: _kWhite,
+            const SizedBox(height: 22),
+            // Header: back button + title
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 40.0),
+              child: Row(
+                children: [
+                  _BackButton(onTap: () => Navigator.pop(context)),
+                  Expanded(
+                    child: Center(
+                      child: Text(
+                        'Portfolio',
+                        style: GoogleFonts.golosText(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w400,
+                          color: _kWhite,
+                        ),
+                      ),
+                    ),
+                  ),
+                  // Balance spacer to keep title centred
+                  const SizedBox(width: 44),
+                ],
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 30),
             // ── Section container ──────────────────────────────────────────
-            Expanded(
+            Padding(
+              padding: const EdgeInsets.fromLTRB(25, 0, 25, 20),
               child: Container(
-                color: _kSectionBg,
+                decoration: BoxDecoration(
+                  color: _kSectionBg,
+                  borderRadius: BorderRadius.circular(20),
+                ),
                 child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     // "Edit Portfolio" tab header
                     _EditPortfolioTab(),
                     // Scrollable form + preview
-                    Expanded(
-                      child: SingleChildScrollView(
-                        padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            // ── Market Type ──────────────────────────────
-                            _FieldLabel('Market Type'),
-                            const SizedBox(height: 6),
-                            _MarketDropdown(
-                              value: _selectedMarket['label']!,
-                              items: _kMarkets.map((m) => m['label']!).toList(),
-                              onChanged: (v) => setState(() {
-                                _selectedMarket = _kMarkets.firstWhere((m) => m['label'] == v, orElse: () => _kMarkets.first);
-                              }),
-                            ),
-                            const SizedBox(height: 14),
-                            // ── Time-in ──────────────────────────────────
-                            _FieldLabel('Time-in'),
-                            const SizedBox(height: 6),
-                            _DateField(
-                              dateText: _formattedDate,
-                              onTap: _pickDate,
-                            ),
-                            const SizedBox(height: 14),
-                            // ── Purchase Price ────────────────────────────
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                _FieldLabel('Purchase Price'),
-                                Row(
-                                  children: ['THB', 'USD'].map((c) => GestureDetector(
-                                    onTap: () => setState(() => _selectedCurrency = c),
-                                    child: Container(
-                                      margin: const EdgeInsets.only(left: 8),
-                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                      decoration: BoxDecoration(
-                                        color: _selectedCurrency == c ? _kGreen : _kInputBg,
-                                        borderRadius: BorderRadius.circular(4),
-                                        border: Border.all(color: _kGreen.withValues(alpha: 0.5)),
-                                      ),
-                                      child: Text(
-                                        c,
-                                        style: GoogleFonts.inter(
-                                          fontSize: 10, 
-                                          fontWeight: FontWeight.bold,
-                                          color: _selectedCurrency == c ? _kDark : _kWhite
+                    SingleChildScrollView(
+                      padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          // ... (content remains the same)
+                          // ── Market Type ──────────────────────────────
+                          _FieldLabel('Market Type'),
+                          const SizedBox(height: 6),
+                          _MarketDropdown(
+                            value: _selectedMarket['label']!,
+                            items: _kMarkets.map((m) => m['label']!).toList(),
+                            onChanged: (v) => setState(() {
+                              _selectedMarket = _kMarkets.firstWhere(
+                                (m) => m['label'] == v,
+                                orElse: () => _kMarkets.first,
+                              );
+                            }),
+                          ),
+                          const SizedBox(height: 14),
+                          // ── Time-in ──────────────────────────────────
+                          _FieldLabel('Time-in'),
+                          const SizedBox(height: 6),
+                          _DateField(
+                            dateText: _formattedDate,
+                            onTap: _pickDate,
+                          ),
+                          const SizedBox(height: 14),
+                          // ── Purchase Price ────────────────────────────
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              _FieldLabel('Purchase Price'),
+                              Row(
+                                children: ['THB', 'USD']
+                                    .map(
+                                      (c) => GestureDetector(
+                                        onTap: () => setState(
+                                          () => _selectedCurrency = c,
+                                        ),
+                                        child: Container(
+                                          margin: const EdgeInsets.only(
+                                            left: 8,
+                                          ),
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 8,
+                                            vertical: 2,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: _selectedCurrency == c
+                                                ? _kGreen
+                                                : _kInputBg,
+                                            borderRadius: BorderRadius.circular(
+                                              4,
+                                            ),
+                                            border: Border.all(
+                                              color: _kGreen.withValues(
+                                                alpha: 0.5,
+                                              ),
+                                            ),
+                                          ),
+                                          child: Text(
+                                            c,
+                                            style: GoogleFonts.inter(
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.bold,
+                                              color: _selectedCurrency == c
+                                                  ? _kDark
+                                                  : _kWhite,
+                                            ),
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                  )).toList(),
-                                ),
-                              ],
+                                    )
+                                    .toList(),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 6),
+                          _TextInputField(
+                            controller: _priceCtrl,
+                            suffix: _selectedCurrency,
+                            keyboardType: TextInputType.number,
+                            onChanged: (_) => setState(() {}),
+                            inputFormatters: [ThousandsSeparatorInputFormatter()],
+                          ),
+                          const SizedBox(height: 14),
+                          // ── Quantity ──────────────────────────────────
+                          _FieldLabel('Quantity'),
+                          const SizedBox(height: 6),
+                          _TextInputField(
+                            controller: _quantityCtrl,
+                            suffix: _ticker,
+                            keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true,
                             ),
-                            const SizedBox(height: 6),
-                            _TextInputField(
-                              controller: _priceCtrl,
-                              suffix: _selectedCurrency,
-                              keyboardType: TextInputType.number,
-                              onChanged: (_) => setState(() {}),
-                            ),
-                            const SizedBox(height: 14),
-                            // ── Quantity ──────────────────────────────────
-                            _FieldLabel('Quantity'),
-                            const SizedBox(height: 6),
-                            _TextInputField(
-                              controller: _quantityCtrl,
-                              suffix: _ticker,
-                              keyboardType: const TextInputType.numberWithOptions(
-                                  decimal: true),
-                              onChanged: (_) => setState(() {}),
-                            ),
-                            const SizedBox(height: 24),
-                            // ── Preview Card ──────────────────────────────
-                            _PreviewCard(
-                              coinName: _coinName,
-                              ticker: _ticker,
-                              dateText: _formattedDate,
-                              price: _priceCtrl.text,
-                              currency: _selectedCurrency,
-                              quantity: _quantityCtrl.text,
-                            ),
-                            const SizedBox(height: 24),
-                            // ── Add Button ────────────────────────────────
-                            _AddButton(
-                              loading: _submitting,
-                              onTap: _submitting ? null : () async {
-                                final price    = double.tryParse(_priceCtrl.text.replaceAll(',', ''));
-                                final quantity = double.tryParse(_quantityCtrl.text.replaceAll(',', ''));
-                                if (price == null || quantity == null || price <= 0 || quantity <= 0) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('กรุณากรอกข้อมูลให้ครบถ้วน')),
-                                  );
-                                  return;
-                                }
-                                setState(() => _submitting = true);
-                                final buyDate = '${_selectedDate.year}-${_selectedDate.month.toString().padLeft(2, '0')}-${_selectedDate.day.toString().padLeft(2, '0')}';
-                                final ok = await _ctrl.addItem(
-                                  assetId:  _selectedMarket['id']!,
-                                  quantity: quantity,
-                                  buyPrice: price,
-                                  currency: _selectedCurrency,
-                                  buyDate:  buyDate,
-                                );
-                                setState(() => _submitting = false);
-                                if (!mounted) return;
-                                if (ok) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('เพิ่มสินทรัพย์สำเร็จ')),
-                                  );
-                                  Navigator.pop(context);
-                                } else {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('เกิดข้อผิดพลาด ลองใหม่อีกครั้ง')),
-                                  );
-                                }
-                              },
-                            ),
-                          ],
-                        ),
+                            onChanged: (_) => setState(() {}),
+                            inputFormatters: [ThousandsSeparatorInputFormatter()],
+                          ),
+                          const SizedBox(height: 24),
+                          // ── Preview Card ──────────────────────────────
+                          _PreviewCard(
+                            coinName: _coinName,
+                            ticker: _ticker,
+                            dateText: _formattedDate,
+                            price: _priceCtrl.text,
+                            currency: _selectedCurrency,
+                            quantity: _quantityCtrl.text,
+                          ),
+                          const SizedBox(height: 24),
+                          // ── Add Button ────────────────────────────────
+                          _AddButton(
+                            loading: _submitting,
+                            onTap: _submitting
+                                ? null
+                                : () async {
+                                    final price = double.tryParse(
+                                      _priceCtrl.text.replaceAll(',', ''),
+                                    );
+                                    final quantity = double.tryParse(
+                                      _quantityCtrl.text.replaceAll(',', ''),
+                                    );
+                                    if (price == null ||
+                                        quantity == null ||
+                                        price <= 0 ||
+                                        quantity <= 0) {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                            'กรุณากรอกข้อมูลให้ครบถ้วน',
+                                          ),
+                                        ),
+                                      );
+                                      return;
+                                    }
+                                    setState(() => _submitting = true);
+                                    final buyDate =
+                                        '${_selectedDate.year}-${_selectedDate.month.toString().padLeft(2, '0')}-${_selectedDate.day.toString().padLeft(2, '0')}';
+                                    final ok = await _ctrl.addItem(
+                                      assetId: _selectedMarket['id']!,
+                                      quantity: quantity,
+                                      buyPrice: price,
+                                      currency: _selectedCurrency,
+                                      buyDate: buyDate,
+                                    );
+                                    setState(() => _submitting = false);
+                                    if (!mounted) return;
+                                    if (ok) {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        const SnackBar(
+                                          content: Text('เพิ่มสินทรัพย์สำเร็จ'),
+                                        ),
+                                      );
+                                      Navigator.pop(context);
+                                    } else {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                            'เกิดข้อผิดพลาด ลองใหม่อีกครั้ง',
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                  },
+                          ),
+                        ],
                       ),
                     ),
                   ],
@@ -285,11 +358,7 @@ BoxDecoration _inputDecoration() {
     borderRadius: BorderRadius.circular(6),
     border: Border.all(color: _kGreen.withOpacity(0.5), width: 1),
     boxShadow: const [
-      BoxShadow(
-        color: Color(0x80000000),
-        blurRadius: 6,
-        offset: Offset(0, 2),
-      ),
+      BoxShadow(color: Color(0x80000000), blurRadius: 6, offset: Offset(0, 2)),
     ],
   );
 }
@@ -316,22 +385,23 @@ class _MarketDropdown extends StatelessWidget {
         child: DropdownButton<String>(
           value: value,
           items: items
-              .map((e) => DropdownMenuItem(
-                    value: e,
-                    child: Text(
-                      e,
-                      style: GoogleFonts.golosText(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w400,
-                        color: _kWhite,
-                      ),
+              .map(
+                (e) => DropdownMenuItem(
+                  value: e,
+                  child: Text(
+                    e,
+                    style: GoogleFonts.golosText(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w400,
+                      color: _kWhite,
                     ),
-                  ))
+                  ),
+                ),
+              )
               .toList(),
           onChanged: onChanged,
           dropdownColor: _kInputBg,
-          icon: const Icon(Icons.keyboard_arrow_down,
-              color: _kWhite, size: 20),
+          icon: const Icon(Icons.keyboard_arrow_down, color: _kWhite, size: 20),
           isExpanded: true,
           style: GoogleFonts.golosText(
             fontSize: 14,
@@ -391,12 +461,14 @@ class _TextInputField extends StatelessWidget {
   final String suffix;
   final TextInputType keyboardType;
   final ValueChanged<String> onChanged;
+  final List<TextInputFormatter>? inputFormatters;
 
   const _TextInputField({
     required this.controller,
     required this.suffix,
     required this.keyboardType,
     required this.onChanged,
+    this.inputFormatters,
   });
 
   @override
@@ -412,6 +484,7 @@ class _TextInputField extends StatelessWidget {
               controller: controller,
               keyboardType: keyboardType,
               onChanged: onChanged,
+              inputFormatters: inputFormatters,
               style: GoogleFonts.golosText(
                 fontSize: 14,
                 fontWeight: FontWeight.w400,
@@ -468,10 +541,21 @@ class _PreviewCard extends StatelessWidget {
           children: [
             ClipOval(
               child: Image.asset(
-                'assets/images/bitcoin_circle_icon.png',
+                AssetHelper.getAssetImagePath(ticker),
                 width: 30,
                 height: 30,
                 fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => Container(
+                  width: 30,
+                  height: 30,
+                  color: _kInputBg,
+                  child: Center(
+                    child: Text(
+                      ticker.isNotEmpty ? ticker[0].toUpperCase() : '?',
+                      style: GoogleFonts.inter(color: _kWhite, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
               ),
             ),
             const SizedBox(width: 10),
@@ -548,13 +632,6 @@ class _PreviewCard extends StatelessWidget {
               ),
             ),
             const Spacer(),
-            SvgPicture.asset(
-              'assets/icons/up_arrow_green.svg',
-              width: 8,
-              height: 5,
-              colorFilter:
-                  const ColorFilter.mode(_kGreen, BlendMode.srcIn),
-            ),
             const SizedBox(width: 4),
             Text(
               '${quantity.isEmpty ? '0' : quantity} $ticker',
@@ -589,12 +666,99 @@ class _AddButton extends StatelessWidget {
         ),
         alignment: Alignment.center,
         child: loading
-            ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.black, strokeWidth: 2))
+            ? const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  color: Colors.black,
+                  strokeWidth: 2,
+                ),
+              )
             : Text(
                 'Add',
-                style: GoogleFonts.golosText(fontSize: 14, fontWeight: FontWeight.w500, color: _kDark),
+                style: GoogleFonts.golosText(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: _kDark,
+                ),
               ),
       ),
     );
   }
 }
+// ─── Back Button ─────────────────────────────────────────────────────────────
+
+class _BackButton extends StatelessWidget {
+  final VoidCallback onTap;
+  const _BackButton({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Ink(
+      width: 44,
+      height: 44,
+      decoration: BoxDecoration(
+        color: const Color(0xFF1E1E1E),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        hoverColor: Colors.white.withOpacity(0.1),
+        splashColor: Colors.white.withOpacity(0.05),
+        child: Center(
+          child: Image.asset(
+            'assets/icons/back_icon.png',
+            width: 20,
+            height: 20,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Input Formatter ─────────────────────────────────────────────────────────
+class ThousandsSeparatorInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
+    if (newValue.text.isEmpty) return newValue;
+
+    int selectionIndex = newValue.selection.end;
+    String text = newValue.text.replaceAll(',', '');
+
+    // Handle leading minus
+    bool isNegative = text.startsWith('-');
+    if (isNegative) text = text.substring(1);
+
+    // Handle decimal point
+    List<String> parts = text.split('.');
+    String integerPart = parts[0];
+    String decimalPart = parts.length > 1 ? '.${parts[1]}' : '';
+
+    if (integerPart.isEmpty && decimalPart.isEmpty && !isNegative) return newValue;
+
+    String formattedInteger = "";
+    if (integerPart.isNotEmpty) {
+      double? val = double.tryParse(integerPart);
+      if (val != null) {
+        formattedInteger = NumberFormat('#,###').format(val);
+      } else {
+        return oldValue;
+      }
+    } else if (isNegative) {
+      formattedInteger = "";
+    }
+
+    String newText = (isNegative ? '-' : '') + formattedInteger + decimalPart;
+
+    // Adjust cursor position
+    int newSelectionIndex = selectionIndex + (newText.length - newValue.text.length);
+
+    return TextEditingValue(
+      text: newText,
+      selection: TextSelection.collapsed(offset: newSelectionIndex.clamp(0, newText.length)),
+    );
+  }
+}
+

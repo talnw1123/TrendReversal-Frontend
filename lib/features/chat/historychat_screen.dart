@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
+import 'package:flutter_svg/flutter_svg.dart'; // Import SVG
 import 'ai_controller.dart';
 import 'chat_screen.dart';
 
 // ─── Design Tokens ────────────────────────────────────────────────────────────
-const Color _kBg = Color(0xFF121212);
-const Color _kCard = Color(0xFF191919);
+const Color _kBg   = Color(0xFF121212);
+const Color _kCard = Color(0xFF282828);
 const Color _kWhite = Color(0xFFFFFFFF);
-const Color _kGray = Color(0xFF999999);
-const Color _kRed = Color(0xFFE4472B);
+const Color _kGray  = Color(0xFF999999);
+const Color _kRed   = Color(0xFFE4472B);
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // HistoryChatScreen
@@ -32,6 +32,8 @@ class _HistoryChatScreenState extends State<HistoryChatScreen> {
     _loadHistory();
   }
 
+  // ── Logic (unchanged) ──────────────────────────────────────────────────────
+
   Future<void> _loadHistory() async {
     setState(() => _loading = true);
     final data = await _aiCtrl.getChatSessions();
@@ -49,7 +51,7 @@ class _HistoryChatScreenState extends State<HistoryChatScreen> {
       MaterialPageRoute(
         builder: (_) => ChatScreen(sessionId: sessionId),
       ),
-    ).then((_) => _loadHistory()); // Refresh when coming back
+    ).then((_) => _loadHistory());
   }
 
   Future<void> _deleteSession(String id) async {
@@ -67,7 +69,7 @@ class _HistoryChatScreenState extends State<HistoryChatScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: _kCard,
+        backgroundColor: const Color(0xFF1E1E1E),
         title: const Text('Rename Chat', style: TextStyle(color: _kWhite)),
         content: TextField(
           controller: controller,
@@ -76,23 +78,79 @@ class _HistoryChatScreenState extends State<HistoryChatScreen> {
           decoration: const InputDecoration(
             hintText: 'Enter new title',
             hintStyle: TextStyle(color: _kGray),
-            enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: _kRed)),
-            focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: _kRed)),
+            enabledBorder: UnderlineInputBorder(
+                borderSide: BorderSide(color: _kRed)),
+            focusedBorder: UnderlineInputBorder(
+                borderSide: BorderSide(color: _kRed)),
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text('Cancel',
+                  style: GoogleFonts.inter(color: _kGray))),
           TextButton(
             onPressed: () {
               Navigator.pop(ctx);
               _renameSession(session['id'], controller.text.trim());
             },
-            child: const Text('Save', style: TextStyle(color: _kRed)),
+            child: Text('Save',
+                style: GoogleFonts.inter(color: _kRed)),
           ),
         ],
       ),
     );
   }
+
+  void _showDeleteDialog(dynamic session) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF1E1E1E),
+        title: const Text('Delete Chat?',
+            style: TextStyle(color: _kWhite)),
+        content: const Text(
+            'Are you sure you want to delete this conversation?',
+            style: TextStyle(color: _kGray)),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text('Cancel',
+                  style: GoogleFonts.inter(color: _kGray))),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              _deleteSession(session['id']);
+            },
+            child: Text('Delete',
+                style: GoogleFonts.inter(color: _kRed)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ── Date grouping ─────────────────────────────────────────────────────────
+
+  bool _isToday(dynamic session) {
+    try {
+      final d = DateTime.parse(session['updatedAt'] ?? '');
+      final now = DateTime.now();
+      return d.year == now.year &&
+          d.month == now.month &&
+          d.day == now.day;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  List<dynamic> get _todaySessions =>
+      _sessions.where(_isToday).toList();
+
+  List<dynamic> get _previousSessions =>
+      _sessions.where((s) => !_isToday(s)).toList();
+
+  // ── Build ─────────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
@@ -104,132 +162,349 @@ class _HistoryChatScreenState extends State<HistoryChatScreen> {
             const _AppHeader(),
             Expanded(
               child: _loading
-                  ? const Center(child: CircularProgressIndicator(color: _kRed))
+                  ? const Center(
+                      child: CircularProgressIndicator(color: _kRed))
                   : _sessions.isEmpty
                       ? const _EmptyState()
                       : RefreshIndicator(
                           onRefresh: _loadHistory,
                           color: _kRed,
-                          child: ListView.builder(
-                            padding: const EdgeInsets.fromLTRB(24, 20, 24, 16),
-                            itemCount: _sessions.length,
-                            itemBuilder: (_, i) => _ChatSessionItem(
-                              session: _sessions[i],
-                              onTap: () => _openChat(_sessions[i]['id']),
-                              onDelete: () => _deleteSession(_sessions[i]['id']),
-                              onRename: () => _showRenameDialog(_sessions[i]),
-                            ),
-                          ),
+                          child: _buildSessionList(),
                         ),
             ),
+            _StartNewChatButton(onTap: () => Navigator.pop(context)),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSessionList() {
+    final today = _todaySessions;
+    final previous = _previousSessions;
+
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(24, 8, 24, 16),
+      children: [
+        if (today.isNotEmpty) ...[
+          const _SectionLabel(label: 'Today'),
+          const SizedBox(height: 10),
+          ...today.map((s) => _ChatSessionItem(
+                session: s,
+                onTap: () => _openChat(s['id']),
+                onRename: () => _showRenameDialog(s),
+                onDelete: () => _showDeleteDialog(s),
+              )),
+          const SizedBox(height: 12),
+        ],
+        if (previous.isNotEmpty) ...[
+          const _SectionLabel(label: 'Previous'),
+          const SizedBox(height: 10),
+          ...previous.map((s) => _ChatSessionItem(
+                session: s,
+                onTap: () => _openChat(s['id']),
+                onRename: () => _showRenameDialog(s),
+                onDelete: () => _showDeleteDialog(s),
+              )),
+        ],
+      ],
+    );
+  }
+}
+
+// ─── App Header ───────────────────────────────────────────────────────────────
+class _AppHeader extends StatelessWidget {
+  const _AppHeader();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        const SizedBox(height: 22),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 40.0),
+          child: Row(
+            children: [
+              _BackButton(onTap: () => Navigator.pop(context)),
+              Expanded(
+                child: Center(
+                  child: Text(
+                    'Chat History',
+                    style: GoogleFonts.golosText(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w400,
+                      color: _kWhite,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 44),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+      ],
+    );
+  }
+}
+
+// ─── Back Button ─────────────────────────────────────────────────────────────
+class _BackButton extends StatelessWidget {
+  final VoidCallback onTap;
+  const _BackButton({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Ink(
+      width: 44,
+      height: 44,
+      decoration: BoxDecoration(
+        color: const Color(0xFF1E1E1E),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        hoverColor: Colors.white.withOpacity(0.1),
+        splashColor: Colors.white.withOpacity(0.05),
+        child: Center(
+          child: Image.asset(
+            'assets/icons/back_icon.png',
+            width: 20,
+            height: 20,
+            color: _kWhite,
+          ),
         ),
       ),
     );
   }
 }
 
-class _AppHeader extends StatelessWidget {
-  const _AppHeader();
+// ─── Section Label ────────────────────────────────────────────────────────────
+class _SectionLabel extends StatelessWidget {
+  final String label;
+  const _SectionLabel({required this.label});
+
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Align(
-            alignment: Alignment.centerLeft,
-            child: GestureDetector(
-              onTap: () => Navigator.pop(context),
-              child: Image.asset('assets/icons/back_arrow.png', width: 20, height: 20, color: _kWhite),
+      padding: const EdgeInsets.only(bottom: 2),
+      child: Text(
+        label,
+        style: GoogleFonts.inter(
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+          color: _kWhite,
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Chat Session Item ────────────────────────────────────────────────────────
+// ─── Chat Session Item ────────────────────────────────────────────────────────
+class _ChatSessionItem extends StatefulWidget {
+  final dynamic session;
+  final VoidCallback onTap;
+  final VoidCallback onRename;
+  final VoidCallback onDelete;
+
+  const _ChatSessionItem({
+    required this.session,
+    required this.onTap,
+    required this.onRename,
+    required this.onDelete,
+  });
+
+  @override
+  State<_ChatSessionItem> createState() => _ChatSessionItemState();
+}
+
+class _ChatSessionItemState extends State<_ChatSessionItem> {
+  bool _isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final title = widget.session['title'] ?? 'Untitled Chat';
+
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          height: 56,
+          margin: const EdgeInsets.only(bottom: 10),
+          decoration: BoxDecoration(
+            color: _isHovered ? const Color(0xFF323232) : _kCard,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Row(
+            children: [
+              const SizedBox(width: 20),
+              // Session icon (SVG)
+              SvgPicture.asset(
+                'assets/icons/chathistory.svg',
+                width: 20,
+                height: 20,
+                colorFilter: const ColorFilter.mode(
+                  _kWhite,
+                  BlendMode.srcIn,
+                ),
+              ),
+              const SizedBox(width: 14),
+              // Title
+              Expanded(
+                child: Text(
+                  title,
+                  style: GoogleFonts.inter(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w400,
+                    color: _kWhite,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              // Three-dot menu (Show only on hover)
+              AnimatedOpacity(
+                duration: const Duration(milliseconds: 200),
+                opacity: _isHovered ? 1.0 : 0.0,
+                child: _ThreeDotMenu(
+                  onRename: widget.onRename,
+                  onDelete: widget.onDelete,
+                ),
+              ),
+              const SizedBox(width: 6),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Three-Dot Menu ──────────────────────────────────────────────────────────
+class _ThreeDotMenu extends StatelessWidget {
+  final VoidCallback onRename;
+  final VoidCallback onDelete;
+
+  const _ThreeDotMenu({required this.onRename, required this.onDelete});
+
+  @override
+  Widget build(BuildContext context) {
+    return PopupMenuButton<String>(
+      icon: const Icon(Icons.more_vert, color: _kWhite, size: 20),
+      color: const Color(0xFF1E1E1E),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      onSelected: (val) {
+        if (val == 'rename') onRename();
+        if (val == 'delete') onDelete();
+      },
+      itemBuilder: (_) => [
+        PopupMenuItem(
+          value: 'rename',
+          child: Row(
+            children: [
+              SvgPicture.asset(
+                'assets/icons/rename.svg',
+                width: 18,
+                height: 18,
+                colorFilter: const ColorFilter.mode(
+                  _kWhite,
+                  BlendMode.srcIn,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Text(
+                'Rename',
+                style: GoogleFonts.inter(color: _kWhite, fontSize: 14),
+              ),
+            ],
+          ),
+        ),
+        PopupMenuItem(
+          value: 'delete',
+          child: Row(
+            children: [
+              SvgPicture.asset(
+                'assets/icons/bin.svg',
+                width: 18,
+                height: 18,
+                colorFilter: const ColorFilter.mode(
+                  _kRed,
+                  BlendMode.srcIn,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Text(
+                'Delete',
+                style: GoogleFonts.inter(color: _kRed, fontSize: 14),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ─── Start New Chat Button ────────────────────────────────────────────────────
+class _StartNewChatButton extends StatelessWidget {
+  final VoidCallback onTap;
+  const _StartNewChatButton({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 12, 24, 20),
+      child: SizedBox(
+        width: double.infinity,
+        height: 56,
+        child: ElevatedButton(
+          onPressed: onTap,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: _kRed,
+            foregroundColor: _kWhite,
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(28),
             ),
           ),
-          Text('Chat History', style: GoogleFonts.inter(fontSize: 24, fontWeight: FontWeight.w400, color: _kWhite)),
+          child: Text(
+                'Start new chat',
+                style: GoogleFonts.inter(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: _kWhite,
+                ),
+              ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Empty State ──────────────────────────────────────────────────────────────
+class _EmptyState extends StatelessWidget {
+  const _EmptyState();
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.chat_bubble_outline_rounded,
+              size: 64, color: Colors.white12),
+          const SizedBox(height: 16),
+          Text(
+            'No chat history found.',
+            style: GoogleFonts.inter(color: _kGray, fontSize: 15),
+          ),
         ],
       ),
     );
   }
-}
-
-class _ChatSessionItem extends StatelessWidget {
-  final dynamic session;
-  final VoidCallback onTap;
-  final VoidCallback onDelete;
-  final VoidCallback onRename;
-  const _ChatSessionItem({
-    required this.session, 
-    required this.onTap, 
-    required this.onDelete,
-    required this.onRename,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final title = session['title'] ?? 'Untitled Chat';
-    final date = DateTime.parse(session['updatedAt'] ?? DateTime.now().toIso8601String());
-    final dateStr = DateFormat('MMM d, HH:mm').format(date);
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: _kCard,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white10),
-      ),
-      child: ListTile(
-        onTap: onTap,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-        leading: const Icon(Icons.chat_bubble_outline_rounded, color: _kRed),
-        title: Text(
-          title,
-          style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w500, color: _kWhite),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-        subtitle: Text(dateStr, style: GoogleFonts.inter(fontSize: 12, color: _kGray)),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            IconButton(
-              icon: const Icon(Icons.edit_outlined, color: Colors.white24, size: 20),
-              onPressed: onRename,
-            ),
-            IconButton(
-              icon: const Icon(Icons.delete_outline_rounded, color: Colors.white24, size: 20),
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (ctx) => AlertDialog(
-                    backgroundColor: _kCard,
-                    title: const Text('Delete Chat?', style: TextStyle(color: _kWhite)),
-                    content: const Text('Are you sure you want to delete this conversation?', style: TextStyle(color: _kGray)),
-                    actions: [
-                      TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
-                      TextButton(onPressed: () { Navigator.pop(ctx); onDelete(); }, child: const Text('Delete', style: TextStyle(color: _kRed))),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _EmptyState extends StatelessWidget {
-  const _EmptyState();
-  @override
-  Widget build(BuildContext context) => Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.chat_bubble_outline_rounded, size: 64, color: Colors.white10),
-            const SizedBox(height: 16),
-            Text('No chat history found.', style: GoogleFonts.inter(color: _kGray)),
-          ],
-        ),
-      );
 }

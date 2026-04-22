@@ -56,11 +56,22 @@ class CurrencyProvider extends ChangeNotifier {
   }
 
   // ── Formatting ──────────────────────────────────────────────────────────────
-  String formatValue(double thbValue, {bool includeSymbol = true}) {
+  String formatValue(double thbValue, {bool includeSymbol = true, bool signed = false}) {
     final displayValue = convert(thbValue);
-    if (!includeSymbol) return _fmt(displayValue);
-    final prefix = isUsd ? '\$' : '฿';
-    return '$prefix${_fmt(displayValue)}';
+    final isNegative = displayValue < 0;
+    final absV = displayValue.abs();
+    final formatted = _fmt(absV);
+
+    String sign = '';
+    if (isNegative) {
+      sign = '-';
+    } else if (signed) {
+      sign = '+';
+    }
+
+    if (!includeSymbol) return '$sign$formatted';
+    final symbol = isUsd ? '\$' : '฿';
+    return '$sign$symbol$formatted';
   }
 
   String _fmt(double v) {
