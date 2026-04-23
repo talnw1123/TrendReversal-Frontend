@@ -7,7 +7,7 @@ class AiController {
   AiController._internal();
 
   final Dio _dio = Dio(BaseOptions(
-    baseUrl: 'http://localhost:3001/api',
+    baseUrl: 'http://localhost:4000/api',
     connectTimeout: const Duration(seconds: 15),
     receiveTimeout: const Duration(seconds: 60), 
   ));
@@ -83,6 +83,40 @@ class AiController {
     } catch (e) {
       print('[AiController] renameSession Error: $e');
       return false;
+    }
+  }
+
+  // ── Predictions ─────────────────────────────────────────────────────────────
+
+  Future<Map<String, dynamic>?> getPrediction(String symbol, {String timeframe = '1h'}) async {
+    try {
+      final res = await _dio.post('/v1/predictions',
+        data: {
+          'symbol': symbol,
+          'timeframe': timeframe,
+        },
+        options: Options(headers: _authHeaders)
+      );
+      return res.data;
+    } catch (e) {
+      print('[AiController] getPrediction Error: $e');
+      return null;
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getLatestPredictions({int limit = 5}) async {
+    try {
+      final res = await _dio.get('/v1/predictions/latest',
+        queryParameters: {'limit': limit},
+        options: Options(headers: _authHeaders)
+      );
+      if (res.data != null && res.data['predictions'] != null) {
+        return List<Map<String, dynamic>>.from(res.data['predictions']);
+      }
+      return [];
+    } catch (e) {
+      print('[AiController] getLatestPredictions Error: $e');
+      return [];
     }
   }
 }

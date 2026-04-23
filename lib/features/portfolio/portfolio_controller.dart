@@ -10,7 +10,7 @@ class PortfolioController {
   PortfolioController._internal();
 
   final Dio _dio = Dio(BaseOptions(
-    baseUrl: 'http://localhost:3001/api',
+    baseUrl: 'http://localhost:4000/api',
     connectTimeout: const Duration(seconds: 10),
     receiveTimeout: const Duration(seconds: 10),
   ));

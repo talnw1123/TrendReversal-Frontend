@@ -52,7 +52,7 @@ class MyApp extends StatelessWidget {
       ),
       home: _determineHome(),
       routes: {
-        '/home': (context) => AppShell(key: AppShell.appShellKey),
+        '/home': (context) => AppShell(),
         '/login': (context) => const LoginScreen(),
         '/auth/success': (context) => const AuthSuccessScreen(),
       },

@@ -8,6 +8,9 @@ import '../portfolio/portfolioadd_screen.dart';
 import '../portfolio/portfolioremove_screen.dart';
 import '../portfolio/portfolio_screen.dart';
 import '../nagbar/app_shell.dart';
+import '../trend/market_controller.dart';
+import '../chat/ai_controller.dart';
+import '../../core/asset_helper.dart';
 
 // ─── Design Tokens ────────────────────────────────────────────────────────────
 const Color _kBg = Color(0xFF121212);
@@ -23,92 +26,11 @@ const Color _kWhite50 = Color(0x80FFFFFF);
 const Color _kNotifDot = Color(0xFFDB2110);
 const Color _kCardBorder = Color(0xFF282828);
 
-// ─── Mock Data ────────────────────────────────────────────────────────────────
-class _CryptoData {
-  final String iconPath;
-  final bool isNetworkIcon;
-  final String name;
-  final String price;
-  final String chartAsset;
-  final bool isPositive;
-
-  const _CryptoData({
-    required this.iconPath,
-    this.isNetworkIcon = false,
-    required this.name,
-    required this.price,
-    required this.chartAsset,
-    required this.isPositive,
-  });
-}
-
-const List<_CryptoData> _kCryptoList = [
-  _CryptoData(
-    iconPath: 'assets/images/bitcoin_icon.png',
-    name: 'Bitcoin (BTC)',
-    price: '2,902,909.40 Bath',
-    chartAsset: 'assets/icons/btc_chart.svg',
-    isPositive: true,
-  ),
-  _CryptoData(
-    iconPath: 'assets/images/solana_icon.jpg',
-    name: 'Solana (SOL)',
-    price: '4,340.39 Bath',
-    chartAsset: 'assets/icons/sol_chart.svg',
-    isPositive: false,
-  ),
-];
-
-class _TransactionData {
-  final String iconPath;
-  final String trend;
-  final String time;
-  final String amount;
-  final bool isUptrend;
-
-  const _TransactionData({
-    required this.iconPath,
-    required this.trend,
-    required this.time,
-    required this.amount,
-    required this.isUptrend,
-  });
-}
-
-const List<_TransactionData> _kTransactions = [
-  _TransactionData(
-    iconPath: 'assets/images/ethereum_icon.png',
-    trend: 'Downtrend',
-    time: '18:59',
-    amount: '99,296.35',
-    isUptrend: false,
-  ),
-  _TransactionData(
-    iconPath: 'assets/images/xrp_icon.png',
-    trend: 'Downtrend',
-    time: '14:20',
-    amount: '71.05',
-    isUptrend: false,
-  ),
-  _TransactionData(
-    iconPath: 'assets/images/bitcoin_icon.png',
-    trend: 'Uptrend',
-    time: '11:09',
-    amount: '2,902,909.40',
-    isUptrend: true,
-  ),
-  _TransactionData(
-    iconPath: 'assets/images/solana_icon.jpg',
-    trend: 'Uptrend',
-    time: '01:00',
-    amount: '4,340.39',
-    isUptrend: true,
-  ),
-];
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // HomeScreen
 // ═══════════════════════════════════════════════════════════════════════════════
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -117,54 +39,136 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final MarketController _marketCtrl = MarketController();
+  final AiController _aiCtrl = AiController();
+
+  List<Map<String, dynamic>> _marketAssets = [];
+  List<Map<String, dynamic>> _predictions = [];
+  bool _isLoading = true;
+  bool _isPredictionsLoading = true;
+  int _predictionsLimit = 5;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    setState(() {
+      _isLoading = true;
+      _isPredictionsLoading = true;
+    });
+
+    // Load market assets (fast)
+    final assets = await _marketCtrl.getMarketAssets();
+    if (mounted) {
+      setState(() {
+        _marketAssets = assets;
+        _isLoading = false;
+      });
+    }
+
+    // Load latest predictions (Unified feed)
+    final latestPredictions = await _aiCtrl.getLatestPredictions(limit: _predictionsLimit);
+
+    if (mounted) {
+      setState(() {
+        _predictions = latestPredictions;
+        _isPredictionsLoading = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    // Show all available assets in cards
+    final topAssets = _marketAssets;
+
     return Scaffold(
       backgroundColor: _kBg,
       body: SafeArea(
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 14),
-              // ── App Bar ───────────────────────────────────────────────────
-              const _HomeAppBar(),
-              const SizedBox(height: 15),
-              // ── Crypto Cards ──────────────────────────────────────────────
-              const _CryptoCardsList(),
-              const SizedBox(height: 4),
-              // ── Transactions ──────────────────────────────────────────────
-              const _SectionDivider(label: 'Transactions'),
-              const SizedBox(height: 4),
-              ..._kTransactions.map((t) => _TransactionItem(data: t)),
-              // See more
-              Padding(
-                padding: const EdgeInsets.only(right: 24, top: 10, bottom: 16),
-                child: Align(
-                  alignment: Alignment.centerRight,
-                  child: GestureDetector(
-                    onTap: () {},
-                    child: Text(
-                      'See more',
-                      style: GoogleFonts.golosText(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        color: _kRed,
+        child: RefreshIndicator(
+          onRefresh: _loadData,
+          color: _kRed,
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 14),
+                // ── App Bar ───────────────────────────────────────────────────
+                const _HomeAppBar(),
+                const SizedBox(height: 15),
+                
+                // ── Crypto Cards ──────────────────────────────────────────────
+                if (_isLoading)
+                  const SizedBox(
+                    height: 240,
+                    child: Center(child: CircularProgressIndicator(color: _kRed)),
+                  )
+                else
+                  _CryptoCardsList(assets: topAssets),
+                
+                const SizedBox(height: 4),
+                
+                // ── AI Predictions ───────────────────────────────────────────
+                const _SectionDivider(label: 'AI Predictions'),
+                const SizedBox(height: 4),
+                if (_isPredictionsLoading)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 40),
+                    child: Center(child: CircularProgressIndicator(color: _kRed)),
+                  )
+                else if (_predictions.isEmpty)
+                   Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 40),
+                    child: Center(
+                      child: Text(
+                        'ไม่พบข้อมูลการพยากรณ์',
+                        style: GoogleFonts.inter(color: _kWhite50, fontSize: 14),
+                      ),
+                    ),
+                  )
+                else
+                  ..._predictions.map((p) => _PredictionItem(prediction: p)),
+
+                // See more
+                if (_predictions.length >= 5 && _predictionsLimit < 10)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 24, top: 10, bottom: 16),
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _predictionsLimit = 10;
+                          });
+                          _loadData();
+                        },
+                        child: Text(
+                          'See more',
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w400,
+                            color: _kRed,
+                          ),
+                        ),
                       ),
                     ),
                   ),
+                const SizedBox(height: 12),
+                
+                // ── Portfolio Summary ─────────────────────────────────────────
+                const _SectionDivider(label: 'Portfolio Summary'),
+                const SizedBox(height: 16),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 24),
+                  child: _PortfolioCard(),
                 ),
-              ),
-              // ── Portfolio ─────────────────────────────────────────────────
-              const _SectionDivider(label: 'Portfolio'),
-              const SizedBox(height: 16),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 24),
-                child: _PortfolioCard(),
-              ),
-              const SizedBox(height: 36),
-            ],
+                const SizedBox(height: 36),
+              ],
+            ),
           ),
         ),
       ),
@@ -239,20 +243,28 @@ class _HomeAppBar extends StatelessWidget {
 // _CryptoCardsList
 // ═══════════════════════════════════════════════════════════════════════════════
 class _CryptoCardsList extends StatelessWidget {
-  const _CryptoCardsList();
+  final List<Map<String, dynamic>> assets;
+  const _CryptoCardsList({required this.assets});
 
   @override
   Widget build(BuildContext context) {
+    if (assets.isEmpty) {
+      return const SizedBox(
+        height: 240,
+        child: Center(child: Text('ไม่มีข้อมูลสินทรัพย์', style: TextStyle(color: Colors.white24))),
+      );
+    }
+
     return SizedBox(
-      height: 240, // เพิ่มพื้นที่ให้เงาด้านบน/ล่าง
+      height: 240,
       child: ListView.separated(
-        clipBehavior: Clip.none, // ห้ามตัดเงาที่ล้นออกมา
+        clipBehavior: Clip.none,
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
-        itemCount: _kCryptoList.length,
+        itemCount: assets.length,
         separatorBuilder: (_, __) => const SizedBox(width: 16),
-        itemBuilder: (context, index) => _CryptoCard(data: _kCryptoList[index]),
+        itemBuilder: (context, index) => _CryptoCard(asset: assets[index]),
       ),
     );
   }
@@ -262,37 +274,41 @@ class _CryptoCardsList extends StatelessWidget {
 // _CryptoCard
 // ═══════════════════════════════════════════════════════════════════════════════
 class _CryptoCard extends StatelessWidget {
-  final _CryptoData data;
-  const _CryptoCard({required this.data});
+  final Map<String, dynamic> asset;
+  const _CryptoCard({required this.asset});
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    // Card is ~60% of screen width, matching the BTC card proportion
-    final cardWidth = (screenWidth - 38) * 0.63;
+    final cardWidth = screenWidth * 0.6; // Smaller width to show hint of next card
+    
+    final name = asset['name'] ?? 'Unknown';
+    final symbol = asset['symbol'] ?? '';
+    final priceTHB = (asset['thbValue'] as num?)?.toDouble() ?? 0.0;
+    final changePercent = (asset['changePercent'] as num?)?.toDouble() ?? 0.0;
+    final isPositive = changePercent >= 0;
 
     return TweenAnimationBuilder<double>(
       tween: Tween<double>(begin: 0, end: 1),
       duration: const Duration(milliseconds: 1800),
       builder: (context, value, child) {
-        // Create a pulsing effect using sine wave
         final pulse = (math.sin(DateTime.now().millisecondsSinceEpoch / 1000 * math.pi) + 1) / 2;
         
         return Container(
           width: cardWidth,
-          height: 180, // กลับมาใช้ความสูงเดิม
+          height: 180,
           decoration: BoxDecoration(
             color: _kCard,
             borderRadius: BorderRadius.circular(10),
             boxShadow: [
               BoxShadow(
-                color: _kGray.withOpacity(0.08 + (pulse * 0.12)), // เรืองแสงสีแดง
+                color: (isPositive ? _kGreen : _kRed).withOpacity(0.08 + (pulse * 0.12)),
                 blurRadius: 10 + (pulse * 5),
                 spreadRadius: 1 + (pulse * 1),
               ),
             ],
             border: Border.all(
-              color: _kGray.withOpacity(0.15 + (pulse * 0.25)), // ขอบสีแดง
+              color: (isPositive ? _kGreen : _kRed).withOpacity(0.15 + (pulse * 0.25)),
               width: 1.2,
             ),
           ),
@@ -302,19 +318,23 @@ class _CryptoCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Name + price row
           Padding(
             padding: const EdgeInsets.only(left: 12, right: 10, top: 12),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Coin icon
                 ClipOval(
                   child: Image.asset(
-                    data.iconPath,
+                    AssetHelper.getAssetImagePath(symbol),
                     width: 44,
                     height: 44,
                     fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => Container(
+                      width: 44,
+                      height: 44,
+                      color: _kDarkCard,
+                      child: const Icon(Icons.show_chart, color: Colors.white24, size: 20),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -324,7 +344,7 @@ class _CryptoCard extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        data.name,
+                        '$name ($symbol)',
                         style: GoogleFonts.inter(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
@@ -335,13 +355,8 @@ class _CryptoCard extends StatelessWidget {
                       ListenableBuilder(
                         listenable: CurrencyProvider(),
                         builder: (context, _) {
-                          // Strip commas and " Bath" to get numeric value
-                          final cleanPrice = data.price
-                              .replaceAll(',', '')
-                              .replaceAll(' Bath', '');
-                          final val = double.tryParse(cleanPrice) ?? 0;
                           return Text(
-                            CurrencyProvider().formatValue(val),
+                            CurrencyProvider().formatValue(priceTHB),
                             style: GoogleFonts.inter(
                               fontSize: 10,
                               fontWeight: FontWeight.w400,
@@ -353,7 +368,6 @@ class _CryptoCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                // Navigate icon
                 Container(
                   width: 24,
                   height: 24,
@@ -371,21 +385,38 @@ class _CryptoCard extends StatelessWidget {
             ),
           ),
           const Spacer(),
-          // ── Real-time Chart Placeholder ───────────────────────────────────
           Padding(
             padding: const EdgeInsets.all(12),
             child: Container(
               width: double.infinity,
               height: 80,
               decoration: BoxDecoration(
-                color: const Color(0xFF1E1E1E), // Slightly lighter than _kCard
+                color: const Color(0xFF1E1E1E),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Center(
-                child: Text(
-                  'Real-time Chart Placeholder',
-                  style: GoogleFonts.inter(fontSize: 10, color: Colors.white24),
-                ),
+              child: Stack(
+                children: [
+                  // Mini Sparkline
+                  Positioned.fill(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: _MiniSparkline(isPositive: isPositive),
+                    ),
+                  ),
+                  // Percentage Badge (Optional overlay)
+                  Positioned(
+                    bottom: 8,
+                    right: 8,
+                    child: Text(
+                      '${isPositive ? '+' : ''}${changePercent.toStringAsFixed(2)}%',
+                      style: GoogleFonts.inter(
+                        fontSize: 9,
+                        fontWeight: FontWeight.bold,
+                        color: (isPositive ? _kGreen : _kRed).withOpacity(0.8),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -427,14 +458,44 @@ class _SectionDivider extends StatelessWidget {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// _TransactionItem
+// _PredictionItem
 // ═══════════════════════════════════════════════════════════════════════════════
-class _TransactionItem extends StatelessWidget {
-  final _TransactionData data;
-  const _TransactionItem({required this.data});
+class _PredictionItem extends StatelessWidget {
+  final Map<String, dynamic> prediction;
+  const _PredictionItem({required this.prediction});
 
   @override
   Widget build(BuildContext context) {
+    // Mapping from Unified API keys
+    final symbol = prediction['market'] ?? prediction['symbol'] ?? '';
+    final trend = prediction['trend_regime'] ?? prediction['overallTrend'] ?? 'neutral';
+    final signal = prediction['signal_action'] ?? 'WAIT';
+    final timeRaw = prediction['date'] ?? prediction['predictedAt'] as String?;
+    final price = (prediction['price'] ?? prediction['currentPrice'] as num?)?.toDouble() ?? 0.0;
+    
+    // Format time: dd/MM/yyyy HH:mm
+    String time = '--/--/---- --:--';
+    if (timeRaw != null) {
+      try {
+        final dt = DateTime.parse(timeRaw).toLocal();
+        final day = dt.day.toString().padLeft(2, '0');
+        final month = dt.month.toString().padLeft(2, '0');
+        final year = dt.year.toString();
+        final hour = dt.hour.toString().padLeft(2, '0');
+        final minute = dt.minute.toString().padLeft(2, '0');
+        time = '$day/$month/$year $hour:$minute';
+      } catch (_) {}
+    }
+
+    final isUptrend = trend.toLowerCase().contains('uptrend') || trend.toLowerCase().contains('bullish');
+    final isDowntrend = trend.toLowerCase().contains('downtrend') || trend.toLowerCase().contains('bearish');
+    final trendLabel = isUptrend ? 'Uptrend' : (isDowntrend ? 'Downtrend' : 'Neutral');
+    final trendColor = isUptrend ? _kGreen : (isDowntrend ? _kRed : _kWhite50);
+    
+    final isBuy = signal.toUpperCase() == 'BUY';
+    final isSell = signal.toUpperCase() == 'SELL';
+    final signalColor = isBuy ? _kGreen : (isSell ? _kRed : _kWhite);
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 2),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
@@ -448,59 +509,59 @@ class _TransactionItem extends StatelessWidget {
           // Coin icon
           ClipOval(
             child: Image.asset(
-              data.iconPath,
+              AssetHelper.getAssetImagePath(symbol),
               width: 30,
               height: 30,
               fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) => Container(
+                width: 30,
+                height: 30,
+                color: _kDarkCard,
+                child: const Icon(Icons.show_chart, color: Colors.white24, size: 15),
+              ),
             ),
           ),
           const SizedBox(width: 14),
-          // Trend + time
+          // Info
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   children: [
+                    // Signal Badge
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                      decoration: BoxDecoration(
+                        color: signalColor.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(3),
+                        border: Border.all(color: signalColor.withOpacity(0.3), width: 0.5),
+                      ),
+                      child: Text(
+                        signal,
+                        style: GoogleFonts.inter(
+                          fontSize: 9,
+                          fontWeight: FontWeight.bold,
+                          color: signalColor,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
                     Text(
-                      data.trend,
+                      trendLabel,
                       style: GoogleFonts.inter(
                         fontSize: 12,
                         fontWeight: FontWeight.w400,
-                        color: _kWhite,
+                        color: _kWhite80,
                       ),
                     ),
-                    const SizedBox(width: 5),
-                    // Trend indicator arrow
-                    data.isUptrend
-                        ? SvgPicture.asset(
-                            'assets/icons/uptrend_arrow.svg',
-                            width: 8,
-                            height: 5,
-                            colorFilter: const ColorFilter.mode(
-                              _kGreen,
-                              BlendMode.srcIn,
-                            ),
-                          )
-                        : Transform.rotate(
-                            angle: 3.14159,
-                            child: SvgPicture.asset(
-                              'assets/icons/uptrend_arrow.svg',
-                              width: 8,
-                              height: 5,
-                              colorFilter: const ColorFilter.mode(
-                                _kRed,
-                                BlendMode.srcIn,
-                              ),
-                            ),
-                          ),
                   ],
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  data.time,
+                  time,
                   style: GoogleFonts.inter(
-                    fontSize: 10,
+                    fontSize: 9,
                     fontWeight: FontWeight.w400,
                     color: _kWhite50,
                   ),
@@ -508,14 +569,19 @@ class _TransactionItem extends StatelessWidget {
               ],
             ),
           ),
-          // Amount
-          Text(
-            data.amount,
-            style: GoogleFonts.inter(
-              fontSize: 16,
-              fontWeight: FontWeight.w400,
-              color: _kWhite,
-            ),
+          // Price
+          ListenableBuilder(
+            listenable: CurrencyProvider(),
+            builder: (context, _) {
+              return Text(
+                CurrencyProvider().formatValue(price),
+                style: GoogleFonts.inter(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w400,
+                  color: _kWhite,
+                ),
+              );
+            },
           ),
         ],
       ),
@@ -785,4 +851,95 @@ class _ActionButton extends StatelessWidget {
       ),
     );
   }
+}
+// ═══════════════════════════════════════════════════════════════════════════════
+// _MiniSparkline
+// ═══════════════════════════════════════════════════════════════════════════════
+class _MiniSparkline extends StatelessWidget {
+  final bool isPositive;
+  const _MiniSparkline({required this.isPositive});
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      size: Size.infinite,
+      painter: _SparklinePainter(
+        color: isPositive ? _kGreen : _kRed,
+        isPositive: isPositive,
+      ),
+    );
+  }
+}
+
+class _SparklinePainter extends CustomPainter {
+  final Color color;
+  final bool isPositive;
+
+  _SparklinePainter({required this.color, required this.isPositive});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+
+    final path = Path();
+    final width = size.width;
+    final height = size.height;
+
+    // Generate pseudo-random points that follow the trend
+    final points = <Offset>[];
+    const steps = 10;
+    
+    for (int i = 0; i <= steps; i++) {
+      double x = (width / steps) * i;
+      
+      // Base trend: start at middle, end at top/bottom
+      double baseLine = height / 2;
+      double targetY = isPositive ? height * 0.2 : height * 0.8;
+      double progress = i / steps;
+      
+      // Interpolate with some "noise"
+      double y = baseLine + (targetY - baseLine) * progress;
+      
+      // Add "zig-zag" noise (deterministic based on index to keep it stable)
+      double noise = (i % 2 == 0 ? 5.0 : -5.0) * (1 - progress);
+      if (i == 0 || i == steps) noise = 0;
+      
+      points.add(Offset(x, y + noise));
+    }
+
+    path.moveTo(points[0].dx, points[0].dy);
+    for (int i = 1; i < points.length; i++) {
+      // Use quadratic bezier for smoothness
+      final xc = (points[i].dx + points[i-1].dx) / 2;
+      final yc = (points[i].dy + points[i-1].dy) / 2;
+      path.quadraticBezierTo(points[i-1].dx, points[i-1].dy, xc, yc);
+    }
+    path.lineTo(points.last.dx, points.last.dy);
+
+    // Draw shadow/gradient under the line
+    final fillPath = Path.from(path)
+      ..lineTo(width, height)
+      ..lineTo(0, height)
+      ..close();
+
+    final gradient = LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: [
+        color.withOpacity(0.2),
+        color.withOpacity(0.0),
+      ],
+    );
+    
+    canvas.drawPath(fillPath, Paint()..shader = gradient.createShader(Rect.fromLTWH(0, 0, width, height)));
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

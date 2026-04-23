@@ -8,7 +8,7 @@ class AuthService {
   AuthService._internal();
 
   final Dio _dio = Dio(BaseOptions(
-    baseUrl: 'http://localhost:3001/api',
+    baseUrl: 'http://localhost:4000/api',
     connectTimeout: const Duration(seconds: 10),
   ));
 
@@ -149,7 +149,7 @@ class AuthService {
   }
 
   // ── Google OAuth URL ─────────────────────────────────────────────────────────
-  String get googleAuthUrl => 'http://localhost:3001/api/v1/auth/google';
+  String get googleAuthUrl => 'http://localhost:4000/api/v1/auth/google';
 
   // ── Logout ───────────────────────────────────────────────────────────────────
   Future<void> logout() async {

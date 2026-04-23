@@ -13,7 +13,7 @@ class AppShell extends StatefulWidget {
   static final GlobalKey<AppShellState> appShellKey =
       GlobalKey<AppShellState>();
 
-  AppShell({super.key});
+  AppShell({Key? key}) : super(key: key ?? appShellKey);
 
   @override
   State<AppShell> createState() => AppShellState();

@@ -5,6 +5,7 @@ class AssetHelper {
       case 'BITCOIN':
         return 'assets/images/bitcoin_circle_icon.png';
       case 'GOLD':
+      case 'XAU':
         return 'assets/images/GOLD.jpg';
       case 'THAI':
       case 'SET':
@@ -12,10 +13,12 @@ class AssetHelper {
       case 'SET50':
         return 'assets/images/SET.png';
       case 'US':
+      case 'SPX':
       case 'S&P 500':
       case 'S&P500':
         return 'assets/images/SP500.png';
       case 'UK':
+      case 'UKX':
       case 'FTSE 100':
       case 'FTSE100':
       case 'FTSE':
