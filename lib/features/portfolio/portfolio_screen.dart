@@ -433,27 +433,39 @@ class _AssetItem extends StatelessWidget {
           children: [
             // Avatar
             ClipOval(
-              child: Image.asset(
-                AssetHelper.getAssetImagePath(symbol),
-                width: 50,
-                height: 50,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => Container(
-                  width: 50,
-                  height: 50,
-                  color: _kBtn,
-                  child: Center(
-                    child: Text(
-                      symbol.isNotEmpty ? symbol[0].toUpperCase() : '?',
-                      style: const TextStyle(
-                        color: _kWhite,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
+              child: AssetHelper.isSvg(AssetHelper.getAssetImagePath(symbol))
+                  ? SvgPicture.asset(
+                      AssetHelper.getAssetImagePath(symbol),
+                      width: 50,
+                      height: 50,
+                      fit: BoxFit.cover,
+                      placeholderBuilder: (context) => Container(
+                        width: 50,
+                        height: 50,
+                        color: _kBtn,
+                        child: const Icon(
+                          Icons.show_chart,
+                          color: Colors.white24,
+                          size: 20,
+                        ),
+                      ),
+                    )
+                  : Image.asset(
+                      AssetHelper.getAssetImagePath(symbol),
+                      width: 50,
+                      height: 50,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => Container(
+                        width: 50,
+                        height: 50,
+                        color: _kBtn,
+                        child: const Icon(
+                          Icons.show_chart,
+                          color: Colors.white24,
+                          size: 20,
+                        ),
                       ),
                     ),
-                  ),
-                ),
-              ),
             ),
             const SizedBox(width: 14),
             Expanded(

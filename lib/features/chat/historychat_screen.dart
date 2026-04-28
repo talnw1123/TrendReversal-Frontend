@@ -368,13 +368,9 @@ class _ChatSessionItemState extends State<_ChatSessionItem> {
                 ),
               ),
               // Three-dot menu (Show only on hover)
-              AnimatedOpacity(
-                duration: const Duration(milliseconds: 200),
-                opacity: _isHovered ? 1.0 : 0.0,
-                child: _ThreeDotMenu(
-                  onRename: widget.onRename,
-                  onDelete: widget.onDelete,
-                ),
+              _ThreeDotMenu(
+                onRename: widget.onRename,
+                onDelete: widget.onDelete,
               ),
               const SizedBox(width: 6),
             ],

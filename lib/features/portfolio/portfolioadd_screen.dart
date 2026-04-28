@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../../core/asset_helper.dart';
@@ -540,23 +541,39 @@ class _PreviewCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             ClipOval(
-              child: Image.asset(
-                AssetHelper.getAssetImagePath(ticker),
-                width: 30,
-                height: 30,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => Container(
-                  width: 30,
-                  height: 30,
-                  color: _kInputBg,
-                  child: Center(
-                    child: Text(
-                      ticker.isNotEmpty ? ticker[0].toUpperCase() : '?',
-                      style: GoogleFonts.inter(color: _kWhite, fontWeight: FontWeight.bold),
+              child: AssetHelper.isSvg(AssetHelper.getAssetImagePath(ticker))
+                  ? SvgPicture.asset(
+                      AssetHelper.getAssetImagePath(ticker),
+                      width: 30,
+                      height: 30,
+                      fit: BoxFit.cover,
+                      placeholderBuilder: (context) => Container(
+                        width: 30,
+                        height: 30,
+                        color: _kInputBg,
+                        child: const Icon(
+                          Icons.show_chart,
+                          color: Colors.white24,
+                          size: 14,
+                        ),
+                      ),
+                    )
+                  : Image.asset(
+                      AssetHelper.getAssetImagePath(ticker),
+                      width: 30,
+                      height: 30,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => Container(
+                        width: 30,
+                        height: 30,
+                        color: _kInputBg,
+                        child: const Icon(
+                          Icons.show_chart,
+                          color: Colors.white24,
+                          size: 14,
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-              ),
             ),
             const SizedBox(width: 10),
             RichText(

@@ -6,12 +6,12 @@ class AssetHelper {
         return 'assets/images/bitcoin_circle_icon.png';
       case 'GOLD':
       case 'XAU':
-        return 'assets/images/GOLD.jpg';
+        return 'assets/images/GOLD.svg';
       case 'THAI':
       case 'SET':
       case 'SET 50':
       case 'SET50':
-        return 'assets/images/SET.png';
+        return 'assets/images/SET50.svg';
       case 'US':
       case 'SPX':
       case 'S&P 500':
@@ -22,10 +22,12 @@ class AssetHelper {
       case 'FTSE 100':
       case 'FTSE100':
       case 'FTSE':
-        return 'assets/images/FTSE100.png';
+        return 'assets/images/FTSE100.svg';
       default:
         // Default fallback if unknown
         return 'assets/images/assets_icon.png';
     }
   }
+
+  static bool isSvg(String path) => path.toLowerCase().endsWith('.svg');
 }

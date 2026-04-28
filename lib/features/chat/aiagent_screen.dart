@@ -84,25 +84,28 @@ class _AiAgentScreenState extends State<AiAgentScreen> {
                   children: [
                     const Spacer(),
                     // Hero text
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'Talk with InsightGPT',
-                          style: GoogleFonts.inter(
-                            fontSize: 32,
-                            fontWeight: FontWeight.w400,
-                            color: _textPrimary,
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Talk with InsightGPT',
+                            style: GoogleFonts.inter(
+                              fontSize: 32,
+                              fontWeight: FontWeight.w400,
+                              color: _textPrimary,
+                            ),
+                            textAlign: TextAlign.center,
                           ),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(width: 12),
-                        SvgPicture.asset(
-                          'assets/images/logoai.svg',
-                          width: 32,
-                          height: 32,
-                        ),
-                      ],
+                          const SizedBox(width: 12),
+                          SvgPicture.asset(
+                            'assets/images/logoai.svg',
+                            width: 32,
+                            height: 32,
+                          ),
+                        ],
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Text(

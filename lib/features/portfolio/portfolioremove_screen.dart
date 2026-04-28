@@ -1,4 +1,3 @@
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -13,7 +12,6 @@ const Color _kInputBg = Color(0xFF282828);
 const Color _kRed = Color(0xFFE4472B);
 const Color _kWhite = Color(0xFFFFFFFF);
 const Color _kGray = Color(0xFF999999);
-const Color _kDark = Color(0xFF050505);
 
 // ── PortfolioRemoveScreen ───────────────────────────────────────────────────
 class PortfolioRemoveScreen extends StatefulWidget {
@@ -238,31 +236,50 @@ class _AssetTransactionCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     ClipOval(
-                      child: Image.asset(
-                        AssetHelper.getAssetImagePath(symbol),
-                        width: 20,
-                        height: 20,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) => Container(
-                          width: 20,
-                          height: 20,
-                          color: const Color(0xFF282828),
-                          child: Center(
-                            child: Text(
-                              symbol.isNotEmpty ? symbol[0].toUpperCase() : '?',
-                              style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                      child: AssetHelper.isSvg(AssetHelper.getAssetImagePath(symbol))
+                          ? SvgPicture.asset(
+                              AssetHelper.getAssetImagePath(symbol),
+                              width: 20,
+                              height: 20,
+                              fit: BoxFit.cover,
+                              placeholderBuilder: (context) => Container(
+                                width: 20,
+                                height: 20,
+                                color: const Color(0xFF282828),
+                                child: const Icon(
+                                  Icons.show_chart,
+                                  color: Colors.white24,
+                                  size: 10,
+                                ),
+                              ),
+                            )
+                          : Image.asset(
+                              AssetHelper.getAssetImagePath(symbol),
+                              width: 20,
+                              height: 20,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) => Container(
+                                width: 20,
+                                height: 20,
+                                color: const Color(0xFF282828),
+                                child: const Icon(
+                                  Icons.show_chart,
+                                  color: Colors.white24,
+                                  size: 10,
+                                ),
+                              ),
                             ),
-                          ),
-                        ),
-                      ),
                     ),
                     const SizedBox(width: 8),
-                    Text(
-                      name,
-                      style: GoogleFonts.inter(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: _kWhite,
+                    Flexible(
+                      child: Text(
+                        name,
+                        style: GoogleFonts.inter(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: _kWhite,
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -274,11 +291,12 @@ class _AssetTransactionCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    _InfoRow('Qty', 'x${qty.toStringAsFixed(4)}'),
-                    _InfoRow('Price', currency.formatValue(price)),
-                    _InfoRow('Date', date),
+                    Expanded(child: _InfoRow('Qty', 'x${qty.toStringAsFixed(4)}')),
+                    const SizedBox(width: 8),
+                    Expanded(child: _InfoRow('Price', currency.formatValue(price))),
+                    const SizedBox(width: 8),
+                    Expanded(child: _InfoRow('Date', date)),
                   ],
                 ),
               ],
@@ -325,8 +343,18 @@ class _InfoRow extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: GoogleFonts.inter(fontSize: 10, color: _kGray)),
-        Text(value, style: GoogleFonts.inter(fontSize: 12, color: _kWhite)),
+        Text(
+          label,
+          style: GoogleFonts.inter(fontSize: 10, color: _kGray),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        Text(
+          value,
+          style: GoogleFonts.inter(fontSize: 12, color: _kWhite),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
       ],
     );
   }
